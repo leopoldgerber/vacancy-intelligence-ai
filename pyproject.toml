@@ -1,0 +1,18 @@
+[project]
+name = 'vacancy-intelligence-ai'
+version = '0.1.0'
+description = 'Competitive Job Posting Optimizer'
+requires-python = '>=3.11'
+dependencies = [
+    'SQLAlchemy>=2.0.0,<3.0.0',
+    'alembic>=1.13.0,<2.0.0',
+    'asyncpg>=0.29.0,<1.0.0',
+    'psycopg[binary]>=3.1.0,<4.0.0',
+]
+
+[tool.setuptools]
+package-dir = {'' = '.'}
+
+[tool.setuptools.packages.find]
+where = ['.']
+include = ['app*']
