@@ -5,12 +5,15 @@ from sqlalchemy import engine_from_config, pool
 
 from app.db.base import Base
 from app.db.config import get_sync_database_url
+from app.db.models_registry import load_models
 
 
 config = context.config
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
+
+load_models()
 
 config.set_main_option('sqlalchemy.url', get_sync_database_url())
 
