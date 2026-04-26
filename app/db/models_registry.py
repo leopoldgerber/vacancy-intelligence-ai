@@ -6,6 +6,7 @@ def load_models() -> None:
     Args:
         """
     model_modules = [
+        'app.db.models.client',
         'app.db.models.validation_run',
         'app.db.models.validation_issue',
     ]
