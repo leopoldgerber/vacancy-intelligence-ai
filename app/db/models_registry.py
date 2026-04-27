@@ -7,6 +7,9 @@ def load_models() -> None:
         """
     model_modules = [
         'app.db.models.client',
+        'app.db.models.company',
+        'app.db.models.vacancy',
+        'app.db.models.vacancy_snapshot',
         'app.db.models.validation_run',
         'app.db.models.validation_issue',
         'app.db.models.quality_run',
