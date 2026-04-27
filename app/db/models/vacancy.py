@@ -1,5 +1,6 @@
 from datetime import datetime
 
+
 from sqlalchemy import DateTime, ForeignKey, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -32,7 +33,7 @@ class Vacancy(Base):
     )
     profile: Mapped[str] = mapped_column(String(255), nullable=False)
     publication_date: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
+        DateTime(),
         nullable=False,
     )
     region: Mapped[str] = mapped_column(String(255), nullable=False)
@@ -52,7 +53,7 @@ class Vacancy(Base):
     standard_plus: Mapped[int] = mapped_column(Integer, nullable=False)
     premium: Mapped[int] = mapped_column(Integer, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
+        DateTime(),
         nullable=False,
         server_default=func.now(),
     )

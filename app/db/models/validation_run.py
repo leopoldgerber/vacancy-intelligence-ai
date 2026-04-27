@@ -18,14 +18,18 @@ class ValidationRun(Base):
     status: Mapped[str] = mapped_column(String(64), nullable=False)
     is_valid: Mapped[bool] = mapped_column(Boolean, nullable=False)
     error_count: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0)
+        Integer, nullable=False, default=0
+    )
     warning_count: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0)
+        Integer,
+        nullable=False,
+        default=0,
+    )
     row_count: Mapped[int] = mapped_column(Integer, nullable=False)
     column_count: Mapped[int] = mapped_column(Integer, nullable=False)
     report_name: Mapped[str] = mapped_column(String(255), nullable=False)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
+        DateTime(),
         nullable=False,
         server_default=func.now(),
     )

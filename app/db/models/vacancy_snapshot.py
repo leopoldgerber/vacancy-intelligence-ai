@@ -37,11 +37,11 @@ class VacancySnapshot(Base):
         nullable=False,
     )
     date_day: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
+        DateTime(),
         nullable=False,
     )
     publication_date: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
+        DateTime(),
         nullable=False,
     )
     vacancy_title: Mapped[str] = mapped_column(String(255), nullable=False)
@@ -72,7 +72,7 @@ class VacancySnapshot(Base):
     premium: Mapped[int] = mapped_column(Integer, nullable=False)
     callbacks: Mapped[int] = mapped_column(Integer, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
+        DateTime(),
         nullable=False,
         server_default=func.now(),
     )

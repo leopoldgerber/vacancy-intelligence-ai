@@ -22,7 +22,7 @@ class Client(Base):
         server_default='true',
     )
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
+        DateTime(),
         nullable=False,
         server_default=func.now(),
     )

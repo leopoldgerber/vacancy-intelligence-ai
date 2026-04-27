@@ -86,6 +86,7 @@ async def insert_vacancy_snapshots(
             callbacks=int(row.callbacks),
         )
         snapshots_to_create.append(vacancy_snapshot)
+        existing_snapshot_keys.add(snapshot_key)
 
     if snapshots_to_create:
         session.add_all(snapshots_to_create)

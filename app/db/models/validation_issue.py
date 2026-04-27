@@ -44,7 +44,7 @@ class ValidationIssue(Base):
         default=0,
     )
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
+        DateTime(),
         nullable=False,
         server_default=func.now(),
     )

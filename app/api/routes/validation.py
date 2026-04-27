@@ -1,11 +1,15 @@
-from datetime import datetime
 from io import BytesIO
 
 import pandas as pd
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, UploadFile
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.schemas.validation import ValidationUploadResponse
+from app.core.exceptions import FileReadError
+from app.core.exceptions import InvalidFileExtensionError
+from app.core.exceptions import MissingFileNameError
+from app.core.exceptions import ValidationExecutionError
 from app.db.session import get_session
 from app.services.data_validation.constants import REQUIRED_COLUMNS
 from app.services.data_validation.service import validate_data
@@ -21,27 +25,19 @@ def check_xlsx_file(file_name: str) -> None:
     is_xlsx = file_name.lower().endswith('.xlsx')
 
     if not is_xlsx:
-        raise HTTPException(
-            status_code=400,
-            detail='Only .xlsx files are allowed.',
-        )
+        raise InvalidFileExtensionError()
 
 
 def read_xlsx_to_dataframe(file_bytes: bytes) -> pd.DataFrame:
     """Read xlsx bytes into DataFrame.
     Args:
         file_bytes (bytes): Uploaded file content."""
-    data = pd.read_excel(BytesIO(file_bytes))
+    try:
+        data = pd.read_excel(BytesIO(file_bytes))
+    except Exception as exc:
+        raise FileReadError() from exc
+
     return data
-
-
-def build_operation_name(operation_name: str) -> str:
-    """Build operation name with current timestamp.
-    Args:
-        operation_name (str): Operation name prefix."""
-    timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-    operation_value = f'{operation_name}_{timestamp}'
-    return operation_value
 
 
 @router.post('/upload', response_model=ValidationUploadResponse)
@@ -54,27 +50,44 @@ async def validate_uploaded_file(
         file (UploadFile): Uploaded xlsx file.
         session (AsyncSession): Async database session."""
     if file.filename is None:
-        raise HTTPException(
-            status_code=400,
-            detail='Uploaded file name is missing.',
-        )
+        raise MissingFileNameError()
 
     check_xlsx_file(file_name=file.filename)
 
     file_bytes = await file.read()
     data = read_xlsx_to_dataframe(file_bytes=file_bytes)
 
-    validation_name = build_operation_name(operation_name='validation')
-    report_name = f'{validation_name}.md'
-
-    validation_result = await validate_data(
-        session=session,
-        data=data,
-        validation_name=validation_name,
-        source_name=file.filename,
-        report_name=report_name,
-        required_columns=REQUIRED_COLUMNS,
+    validation_name = file.filename.replace(
+        '.xlsx',
+        '_validation',
     )
+    report_name = file.filename.replace(
+        '.xlsx',
+        '_validation.md',
+    )
+
+    try:
+        validation_result = await validate_data(
+            session=session,
+            data=data,
+            validation_name=validation_name,
+            source_name=file.filename,
+            report_name=report_name,
+            required_columns=REQUIRED_COLUMNS,
+        )
+    except IntegrityError as exc:
+        await session.rollback()
+        raise ValidationExecutionError(
+            detail='Validation failed due to database integrity error.',
+        ) from exc
+    except SQLAlchemyError as exc:
+        await session.rollback()
+        raise ValidationExecutionError(
+            detail='Validation failed due to database error.',
+        ) from exc
+    except Exception as exc:
+        await session.rollback()
+        raise ValidationExecutionError() from exc
 
     if not validation_result['is_valid']:
         return ValidationUploadResponse(
