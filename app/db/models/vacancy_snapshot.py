@@ -18,8 +18,8 @@ class VacancySnapshot(Base):
             'client_id',
             'company_id',
             'vacancy_id',
-            'snapshot_date',
-            name='uq_vacancy_snapshots_client_company_vacancy_date',
+            'date_day',
+            name='uq_vacancy_snapshots_client_company_vacancy_date_day',
         ),
     )
 
@@ -36,7 +36,7 @@ class VacancySnapshot(Base):
         ForeignKey('vacancies.vacancy_id'),
         nullable=False,
     )
-    snapshot_date: Mapped[datetime] = mapped_column(
+    date_day: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
     )
