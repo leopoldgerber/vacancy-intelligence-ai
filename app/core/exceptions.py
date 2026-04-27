@@ -39,6 +39,14 @@ class FileReadError(AppError):
     detail = 'Failed to read uploaded xlsx file.'
 
 
+class ValidationExecutionError(AppError):
+    """Raise when validation execution fails.
+    Args:
+        """
+    status_code = 500
+    detail = 'Validation execution failed.'
+
+
 class PipelineExecutionError(AppError):
     """Raise when pipeline execution fails.
     Args:
@@ -47,9 +55,25 @@ class PipelineExecutionError(AppError):
     detail = 'Pipeline execution failed.'
 
 
-class ValidationExecutionError(AppError):
-    """Raise when validation execution fails.
+class CompanyMappingError(AppError):
+    """Raise when company mapping is missing.
     Args:
         """
     status_code = 500
-    detail = 'Validation execution failed.'
+    detail = 'Failed to resolve company mapping for ingestion.'
+
+
+class VacancyIngestionError(AppError):
+    """Raise when vacancy ingestion fails.
+    Args:
+        """
+    status_code = 500
+    detail = 'Vacancy ingestion failed.'
+
+
+class VacancySnapshotIngestionError(AppError):
+    """Raise when vacancy snapshot ingestion fails.
+    Args:
+        """
+    status_code = 500
+    detail = 'Vacancy snapshot ingestion failed.'

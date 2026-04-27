@@ -1,6 +1,7 @@
 import pandas as pd
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.exceptions import CompanyMappingError
 from app.db.models.vacancy_snapshot import VacancySnapshot
 from app.services.ingestion.vacancies.service import parse_datetime_value
 from app.services.ingestion.vacancies.service import parse_nullable_integer
@@ -34,6 +35,7 @@ async def insert_vacancy_snapshots(
         {
             int(company_map[(int(row.client_id), str(row.company_name))])
             for row in data.itertuples(index=False)
+            if (int(row.client_id), str(row.company_name)) in company_map
         }
     )
 
@@ -49,7 +51,17 @@ async def insert_vacancy_snapshots(
     for row in data.itertuples(index=False):
         client_id = int(row.client_id)
         company_name = str(row.company_name)
-        company_id = company_map[(client_id, company_name)]
+        company_key = (client_id, company_name)
+
+        if company_key not in company_map:
+            raise CompanyMappingError(
+                detail=(
+                    'Failed to resolve company mapping for '
+                    f'client_id={client_id}, company_name={company_name}.'
+                ),
+            )
+
+        company_id = company_map[company_key]
         vacancy_id = int(row.vacancy_id)
         date_day = parse_datetime_value(row.date_day)
 

@@ -1,9 +1,9 @@
 from datetime import datetime
 
-
 import pandas as pd
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.exceptions import CompanyMappingError
 from app.db.models.vacancy import Vacancy
 from app.services.ingestion.vacancies.persistence import (
     create_vacancy,
@@ -106,7 +106,17 @@ async def upsert_vacancies(
         vacancy_id = int(row.vacancy_id)
         client_id = int(row.client_id)
         company_name = str(row.company_name)
-        company_id = company_map[(client_id, company_name)]
+        company_key = (client_id, company_name)
+
+        if company_key not in company_map:
+            raise CompanyMappingError(
+                detail=(
+                    'Failed to resolve company mapping for '
+                    f'client_id={client_id}, company_name={company_name}.'
+                ),
+            )
+
+        company_id = company_map[company_key]
 
         vacancy_title = str(row.vacancy_title)
         vacancy_description = str(row.vacancy_description)

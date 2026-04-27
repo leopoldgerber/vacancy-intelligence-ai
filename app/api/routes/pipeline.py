@@ -1,10 +1,15 @@
 from io import BytesIO
 
 import pandas as pd
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, UploadFile
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.schemas.pipeline import PipelineUploadResponse
+from app.core.exceptions import FileReadError
+from app.core.exceptions import InvalidFileExtensionError
+from app.core.exceptions import MissingFileNameError
+from app.core.exceptions import PipelineExecutionError
 from app.db.session import get_session
 from app.services.pipeline.service import execute_pipeline_1
 
@@ -19,17 +24,18 @@ def check_xlsx_file(file_name: str) -> None:
     is_xlsx = file_name.lower().endswith('.xlsx')
 
     if not is_xlsx:
-        raise HTTPException(
-            status_code=400,
-            detail='Only .xlsx files are allowed.',
-        )
+        raise InvalidFileExtensionError()
 
 
 def read_xlsx_to_dataframe(file_bytes: bytes) -> pd.DataFrame:
     """Read xlsx bytes into DataFrame.
     Args:
         file_bytes (bytes): Uploaded file content."""
-    data = pd.read_excel(BytesIO(file_bytes))
+    try:
+        data = pd.read_excel(BytesIO(file_bytes))
+    except Exception as exc:
+        raise FileReadError() from exc
+
     return data
 
 
@@ -43,21 +49,32 @@ async def run_pipeline(
         file (UploadFile): Uploaded xlsx file.
         session (AsyncSession): Async database session."""
     if file.filename is None:
-        raise HTTPException(
-            status_code=400,
-            detail='Uploaded file name is missing.',
-        )
+        raise MissingFileNameError()
 
     check_xlsx_file(file_name=file.filename)
 
     file_bytes = await file.read()
     data = read_xlsx_to_dataframe(file_bytes=file_bytes)
 
-    pipeline_result = await execute_pipeline_1(
-        session=session,
-        data=data,
-        source_name=file.filename,
-    )
+    try:
+        pipeline_result = await execute_pipeline_1(
+            session=session,
+            data=data,
+            source_name=file.filename,
+        )
+    except IntegrityError as exc:
+        await session.rollback()
+        raise PipelineExecutionError(
+            detail='Pipeline failed due to database integrity error.',
+        ) from exc
+    except SQLAlchemyError as exc:
+        await session.rollback()
+        raise PipelineExecutionError(
+            detail='Pipeline failed due to database error.',
+        ) from exc
+    except Exception as exc:
+        await session.rollback()
+        raise PipelineExecutionError() from exc
 
     if pipeline_result['ingestion_result'] is None:
         return PipelineUploadResponse(

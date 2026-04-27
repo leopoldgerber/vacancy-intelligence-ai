@@ -1,6 +1,8 @@
 import pandas as pd
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.exceptions import VacancyIngestionError
+from app.core.exceptions import VacancySnapshotIngestionError
 from app.services.ingestion.companies.service import upsert_companies
 from app.services.ingestion.vacancies.service import upsert_vacancies
 from app.services.ingestion.vacancy_snapshots.service import (
@@ -21,17 +23,23 @@ async def run_ingestion_pipeline(
         data=data,
     )
 
-    vacancy_id_map = await upsert_vacancies(
-        session=session,
-        data=data,
-        company_map=company_map,
-    )
+    try:
+        vacancy_id_map = await upsert_vacancies(
+            session=session,
+            data=data,
+            company_map=company_map,
+        )
+    except Exception as exc:
+        raise VacancyIngestionError() from exc
 
-    created_snapshots = await insert_vacancy_snapshots(
-        session=session,
-        data=data,
-        company_map=company_map,
-    )
+    try:
+        created_snapshots = await insert_vacancy_snapshots(
+            session=session,
+            data=data,
+            company_map=company_map,
+        )
+    except Exception as exc:
+        raise VacancySnapshotIngestionError() from exc
 
     await session.commit()
 
