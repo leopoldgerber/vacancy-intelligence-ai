@@ -1,10 +1,11 @@
 from collections.abc import Sequence
+
 import pandas as pd
 
 
 def check_value_not_empty(
-        data: pd.DataFrame,
-        column_name: str
+    data: pd.DataFrame,
+    column_name: str,
 ) -> dict[str, int | str | bool]:
     """Check that column values are not empty.
     Args:
@@ -44,8 +45,8 @@ def check_value_not_empty(
 
 
 def check_value_is_string(
-        data: pd.DataFrame,
-        column_name: str
+    data: pd.DataFrame,
+    column_name: str,
 ) -> dict[str, int | str | bool]:
     """Check that non-empty column values are strings.
     Args:
@@ -56,7 +57,8 @@ def check_value_is_string(
 
     if non_empty_mask.any():
         invalid_mask = non_empty_mask & ~column_series.apply(
-            lambda value: isinstance(value, str))
+            lambda value: isinstance(value, str)
+        )
     else:
         invalid_mask = pd.Series(False, index=data.index)
 
@@ -78,8 +80,8 @@ def check_value_is_string(
 
 
 def check_value_is_integer(
-        data: pd.DataFrame,
-        column_name: str
+    data: pd.DataFrame,
+    column_name: str,
 ) -> dict[str, int | str | bool]:
     """Check that non-empty column values are integers.
     Args:
@@ -90,11 +92,12 @@ def check_value_is_integer(
 
     if non_empty_mask.any():
         parsed_series = pd.to_numeric(
-            column_series[non_empty_mask], errors='coerce')
+            column_series[non_empty_mask],
+            errors='coerce',
+        )
         invalid_mask = pd.Series(False, index=data.index)
         invalid_mask.loc[non_empty_mask] = (
-            parsed_series.isna()
-            | (parsed_series % 1 != 0)
+            parsed_series.isna() | (parsed_series % 1 != 0)
         )
     else:
         invalid_mask = pd.Series(False, index=data.index)
@@ -149,7 +152,8 @@ def check_value_matches_datetime_format(
         'is_valid': is_valid,
         'issue_count': issue_count,
         'message': (
-            f'Column {column_name} matches datetime format {datetime_format}.'
+            f'Column {column_name} matches datetime format '
+            f'{datetime_format}.'
             if is_valid
             else f'Column {column_name} contains invalid datetime values.'
         ),
@@ -172,14 +176,16 @@ def check_reference_exists_in_clients(
 
     if non_empty_mask.any():
         parsed_series = pd.to_numeric(
-            column_series[non_empty_mask], errors='coerce')
-        comparable_mask = parsed_series.notna() & (parsed_series % 1 == 0)
-        invalid_mask = pd.Series(False, index=data.index)
-        invalid_values_mask = (
-            comparable_mask
-            & ~parsed_series.astype(int).isin(client_ids)
+            column_series[non_empty_mask],
+            errors='coerce',
         )
-        invalid_mask.loc[parsed_series.index] = invalid_values_mask
+        comparable_mask = parsed_series.notna() & (parsed_series % 1 == 0)
+
+        comparable_series = parsed_series.loc[comparable_mask].astype(int)
+        invalid_values_mask = ~comparable_series.isin(client_ids)
+
+        invalid_mask = pd.Series(False, index=data.index)
+        invalid_mask.loc[invalid_values_mask.index] = invalid_values_mask
     else:
         invalid_mask = pd.Series(False, index=data.index)
 
@@ -213,7 +219,9 @@ def check_value_is_numeric_if_present(
 
     if non_empty_mask.any():
         parsed_series = pd.to_numeric(
-            column_series[non_empty_mask], errors='coerce')
+            column_series[non_empty_mask],
+            errors='coerce',
+        )
         invalid_mask = pd.Series(False, index=data.index)
         invalid_mask.loc[non_empty_mask] = parsed_series.isna()
     else:
@@ -228,7 +236,8 @@ def check_value_is_numeric_if_present(
         'is_valid': is_valid,
         'issue_count': issue_count,
         'message': (
-            f'Column {column_name} contains valid numeric values when present.'
+            f'Column {column_name} contains valid numeric values when '
+            f'present.'
             if is_valid
             else f'Column {column_name} contains invalid numeric values.'
         ),
@@ -252,7 +261,7 @@ def run_blocking_field_checks(
         check_reference_exists_in_clients(
             data=data,
             client_ids=client_ids,
-            column_name='client_id'
+            column_name='client_id',
         ),
         check_value_not_empty(data=data, column_name='company_name'),
         check_value_is_string(data=data, column_name='company_name'),
@@ -291,7 +300,7 @@ def run_blocking_field_checks(
 
 
 def run_warning_field_checks(
-        data: pd.DataFrame
+    data: pd.DataFrame,
 ) -> list[dict[str, int | str | bool]]:
     """Run warning-level field validation checks.
     Args:
@@ -314,18 +323,3 @@ def run_warning_field_checks(
         check_value_is_string(data=data, column_name='work_schedule'),
     ]
     return check_results
-
-
-if __name__ == '__main__':
-    import pandas as pd
-
-    data = pd.read_excel('data/input_sample.xlsx')
-    client_ids = [1]
-
-    blocking_results = run_blocking_field_checks(
-        data=data,
-        client_ids=client_ids,
-    )
-
-    warning_results = run_warning_field_checks(data=data)
-    print(warning_results)

@@ -14,6 +14,27 @@ from app.services.ingestion.vacancy_snapshots.repositories import (
 )
 
 
+def build_snapshot_key(
+    client_id: int,
+    company_id: int,
+    vacancy_id: int,
+    date_day: object,
+) -> tuple[int, int, int, object]:
+    """Build vacancy snapshot unique key.
+    Args:
+        client_id (int): Client identifier.
+        company_id (int): Company identifier.
+        vacancy_id (int): Vacancy identifier.
+        date_day (object): Snapshot date value."""
+    snapshot_key = (
+        client_id,
+        company_id,
+        vacancy_id,
+        parse_datetime_value(date_day),
+    )
+    return snapshot_key
+
+
 async def insert_vacancy_snapshots(
     session: AsyncSession,
     data: pd.DataFrame,
@@ -63,13 +84,12 @@ async def insert_vacancy_snapshots(
 
         company_id = company_map[company_key]
         vacancy_id = int(row.vacancy_id)
-        date_day = parse_datetime_value(row.date_day)
 
-        snapshot_key = (
-            client_id,
-            company_id,
-            vacancy_id,
-            date_day,
+        snapshot_key = build_snapshot_key(
+            client_id=client_id,
+            company_id=company_id,
+            vacancy_id=vacancy_id,
+            date_day=row.date_day,
         )
 
         if snapshot_key in existing_snapshot_keys:
@@ -79,7 +99,7 @@ async def insert_vacancy_snapshots(
             client_id=client_id,
             company_id=company_id,
             vacancy_id=vacancy_id,
-            date_day=date_day,
+            date_day=parse_datetime_value(row.date_day),
             publication_date=parse_datetime_value(row.publication_date),
             vacancy_title=str(row.vacancy_title),
             vacancy_description=str(row.vacancy_description),
