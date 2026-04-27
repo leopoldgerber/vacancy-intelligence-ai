@@ -1,36 +1,17 @@
+from datetime import datetime
 from io import BytesIO
 
 import pandas as pd
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.schemas.validation import ValidationUploadResponse
 from app.db.session import get_session
+from app.services.data_validation.constants import REQUIRED_COLUMNS
 from app.services.data_validation.service import validate_data
 
-router = APIRouter(prefix='/validation', tags=['validation'])
 
-REQUIRED_COLUMNS = [
-    'city',
-    'client_id',
-    'company_name',
-    'employment_type',
-    'date_day',
-    'profile',
-    'publication_date',
-    'region',
-    'salary_from',
-    'salary_to',
-    'tariff',
-    'vacancy_description',
-    'vacancy_id',
-    'vacancy_title',
-    'work_experience',
-    'work_schedule',
-    'standard',
-    'standard_plus',
-    'premium',
-    'callbacks',
-]
+router = APIRouter(prefix='/validation', tags=['validation'])
 
 
 def check_xlsx_file(file_name: str) -> None:
@@ -54,11 +35,20 @@ def read_xlsx_to_dataframe(file_bytes: bytes) -> pd.DataFrame:
     return data
 
 
-@router.post('/upload')
+def build_operation_name(operation_name: str) -> str:
+    """Build operation name with current timestamp.
+    Args:
+        operation_name (str): Operation name prefix."""
+    timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    operation_value = f'{operation_name}_{timestamp}'
+    return operation_value
+
+
+@router.post('/upload', response_model=ValidationUploadResponse)
 async def validate_uploaded_file(
     file: UploadFile = File(...),
     session: AsyncSession = Depends(get_session),
-) -> dict[str, object]:
+) -> ValidationUploadResponse:
     """Validate uploaded xlsx file.
     Args:
         file (UploadFile): Uploaded xlsx file.
@@ -74,8 +64,8 @@ async def validate_uploaded_file(
     file_bytes = await file.read()
     data = read_xlsx_to_dataframe(file_bytes=file_bytes)
 
-    validation_name = file.filename.replace('.xlsx', '_validation')
-    report_name = file.filename.replace('.xlsx', '_validation.md')
+    validation_name = build_operation_name(operation_name='validation')
+    report_name = f'{validation_name}.md'
 
     validation_result = await validate_data(
         session=session,
@@ -87,16 +77,16 @@ async def validate_uploaded_file(
     )
 
     if not validation_result['is_valid']:
-        return {
-            'status': 'failed',
-            'message': 'Validation failed.',
-            'validation_run_id': validation_result['validation_run'].id,
-            'report_path': validation_result['report_path'],
-        }
+        return ValidationUploadResponse(
+            status='failed',
+            message='Validation failed.',
+            validation_run_id=validation_result['validation_run'].id,
+            report_path=validation_result['report_path'],
+        )
 
-    return {
-        'status': 'ok',
-        'message': 'Validation completed successfully.',
-        'validation_run_id': validation_result['validation_run'].id,
-        'report_path': validation_result['report_path'],
-    }
+    return ValidationUploadResponse(
+        status='ok',
+        message='Validation completed successfully.',
+        validation_run_id=validation_result['validation_run'].id,
+        report_path=validation_result['report_path'],
+    )
