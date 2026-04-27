@@ -1,3 +1,4 @@
+from datetime import datetime
 from io import BytesIO
 
 import pandas as pd
@@ -6,6 +7,7 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.schemas.validation import ValidationUploadResponse
+from app.core.exceptions import AppError
 from app.core.exceptions import FileReadError
 from app.core.exceptions import InvalidFileExtensionError
 from app.core.exceptions import MissingFileNameError
@@ -40,6 +42,15 @@ def read_xlsx_to_dataframe(file_bytes: bytes) -> pd.DataFrame:
     return data
 
 
+def build_operation_name(operation_name: str) -> str:
+    """Build operation name with current timestamp.
+    Args:
+        operation_name (str): Operation name prefix."""
+    timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    operation_value = f'{operation_name}_{timestamp}'
+    return operation_value
+
+
 @router.post('/upload', response_model=ValidationUploadResponse)
 async def validate_uploaded_file(
     file: UploadFile = File(...),
@@ -57,14 +68,8 @@ async def validate_uploaded_file(
     file_bytes = await file.read()
     data = read_xlsx_to_dataframe(file_bytes=file_bytes)
 
-    validation_name = file.filename.replace(
-        '.xlsx',
-        '_validation',
-    )
-    report_name = file.filename.replace(
-        '.xlsx',
-        '_validation.md',
-    )
+    validation_name = build_operation_name(operation_name='validation')
+    report_name = f'{validation_name}.md'
 
     try:
         validation_result = await validate_data(
@@ -75,6 +80,9 @@ async def validate_uploaded_file(
             report_name=report_name,
             required_columns=REQUIRED_COLUMNS,
         )
+    except AppError:
+        await session.rollback()
+        raise
     except IntegrityError as exc:
         await session.rollback()
         raise ValidationExecutionError(

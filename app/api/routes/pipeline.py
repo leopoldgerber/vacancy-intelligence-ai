@@ -6,6 +6,7 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.schemas.pipeline import PipelineUploadResponse
+from app.core.exceptions import AppError
 from app.core.exceptions import FileReadError
 from app.core.exceptions import InvalidFileExtensionError
 from app.core.exceptions import MissingFileNameError
@@ -62,6 +63,9 @@ async def run_pipeline(
             data=data,
             source_name=file.filename,
         )
+    except AppError:
+        await session.rollback()
+        raise
     except IntegrityError as exc:
         await session.rollback()
         raise PipelineExecutionError(
