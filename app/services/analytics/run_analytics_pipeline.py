@@ -1,0 +1,95 @@
+from datetime import datetime
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.services.analytics.constants import ANALYTICS_STATUS_NO_DATA
+from app.services.analytics.constants import ANALYTICS_STATUS_SUCCESS
+from app.services.analytics.data_loaders import load_snapshot_data
+from app.services.analytics.name_builders import build_analytics_name
+from app.services.analytics.name_builders import build_analytics_report_name
+from app.services.analytics.persistence import save_analytics_run
+from app.services.analytics.report_builders import build_analytics_report
+from app.services.analytics.report_writers import save_analytics_report
+
+
+async def run_analytics_pipeline(
+    session: AsyncSession,
+    client_id: int,
+    date_from: datetime,
+    date_to: datetime,
+) -> dict[str, int | str | bool]:
+    """Run analytics pipeline.
+    Args:
+        session (AsyncSession): Database session.
+        client_id (int): Client identifier.
+        date_from (datetime): Analytics period start.
+        date_to (datetime): Analytics period end.
+    """
+    analytics_name = build_analytics_name()
+    report_name = build_analytics_report_name(
+        analytics_name=analytics_name,
+    )
+    snapshot_data = await load_snapshot_data(
+        session=session,
+        client_id=client_id,
+        date_from=date_from,
+        date_to=date_to,
+    )
+    snapshot_count = len(snapshot_data)
+
+    if snapshot_data.empty:
+        analytics_run = await save_analytics_run(
+            session=session,
+            analytics_name=analytics_name,
+            client_id=client_id,
+            date_from=date_from,
+            date_to=date_to,
+            status=ANALYTICS_STATUS_NO_DATA,
+            is_success=False,
+            snapshot_count=snapshot_count,
+            report_name=report_name,
+        )
+        report_content = build_analytics_report(
+            analytics_run=analytics_run,
+        )
+        save_analytics_report(
+            report_name=analytics_run.report_name,
+            report_content=report_content,
+        )
+
+        return {
+            'analytics_run_id': analytics_run.id,
+            'analytics_name': analytics_run.analytics_name,
+            'status': analytics_run.status,
+            'is_success': analytics_run.is_success,
+            'snapshot_count': analytics_run.snapshot_count,
+            'report_name': analytics_run.report_name,
+        }
+
+    analytics_run = await save_analytics_run(
+        session=session,
+        analytics_name=analytics_name,
+        client_id=client_id,
+        date_from=date_from,
+        date_to=date_to,
+        status=ANALYTICS_STATUS_SUCCESS,
+        is_success=True,
+        snapshot_count=snapshot_count,
+        report_name=report_name,
+    )
+    report_content = build_analytics_report(
+        analytics_run=analytics_run,
+    )
+    save_analytics_report(
+        report_name=analytics_run.report_name,
+        report_content=report_content,
+    )
+
+    return {
+        'analytics_run_id': analytics_run.id,
+        'analytics_name': analytics_run.analytics_name,
+        'status': analytics_run.status,
+        'is_success': analytics_run.is_success,
+        'snapshot_count': analytics_run.snapshot_count,
+        'report_name': analytics_run.report_name,
+    }
