@@ -14,6 +14,7 @@ def load_models() -> None:
         'app.db.models.validation_issue',
         'app.db.models.quality_run',
         'app.db.models.quality_issue',
+        'app.db.models.analytics_run',
     ]
 
     for module_path in model_modules:

@@ -1,7 +1,7 @@
 """create vacancy snapshots table
 
 Revision ID: b1164fc9acb6
-Revises: 2440a194d66a
+Revises: 9de11c13e241
 Create Date: 2026-04-27 13:25:36.348524
 
 """
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = 'b1164fc9acb6'
-down_revision: Union[str, Sequence[str], None] = '2440a194d66a'
+down_revision: Union[str, Sequence[str], None] = '9de11c13e241'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

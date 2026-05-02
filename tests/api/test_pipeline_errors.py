@@ -13,7 +13,7 @@ async def test_run_pipeline_invalid_file_extension(
     Args:
         client (AsyncClient): Async API client."""
     response = await client.post(
-        '/pipeline/run',
+        '/pipeline-1/run',
         files={
             'file': (
                 'test_input.csv',
@@ -40,7 +40,7 @@ async def test_run_pipeline_missing_client_reference(
     xlsx_bytes = build_xlsx_bytes(data=data)
 
     response = await client.post(
-        '/pipeline/run',
+        '/pipeline-1/run',
         files={
             'file': (
                 'test_input.xlsx',

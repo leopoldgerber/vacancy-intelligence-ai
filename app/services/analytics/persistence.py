@@ -1,0 +1,45 @@
+from datetime import datetime
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.db.models.analytics_run import AnalyticsRun
+
+
+async def save_analytics_run(
+    session: AsyncSession,
+    analytics_name: str,
+    client_id: int,
+    date_from: datetime,
+    date_to: datetime,
+    status: str,
+    is_success: bool,
+    snapshot_count: int,
+    report_name: str,
+) -> AnalyticsRun:
+    """Save analytics run.
+    Args:
+        session (AsyncSession): Database session.
+        analytics_name (str): Analytics run name.
+        client_id (int): Client identifier.
+        date_from (datetime): Analytics period start.
+        date_to (datetime): Analytics period end.
+        status (str): Analytics run status.
+        is_success (bool): Whether analytics run is successful.
+        snapshot_count (int): Number of snapshots in analytics input.
+        report_name (str): Analytics report name.
+    """
+    analytics_run = AnalyticsRun(
+        analytics_name=analytics_name,
+        client_id=client_id,
+        date_from=date_from,
+        date_to=date_to,
+        status=status,
+        is_success=is_success,
+        snapshot_count=snapshot_count,
+        report_name=report_name,
+    )
+
+    session.add(analytics_run)
+    await session.flush()
+
+    return analytics_run

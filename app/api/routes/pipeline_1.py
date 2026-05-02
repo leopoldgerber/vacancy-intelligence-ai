@@ -15,7 +15,7 @@ from app.db.session import get_session
 from app.services.pipeline.service import execute_pipeline_1
 
 
-router = APIRouter(prefix='/pipeline', tags=['pipeline'])
+router = APIRouter(prefix='/pipeline-1', tags=['pipeline'])
 
 
 def check_xlsx_file(file_name: str) -> None:

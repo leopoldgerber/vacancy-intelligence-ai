@@ -10,12 +10,35 @@ db-down:
 db-logs:
 	docker compose -f $(COMPOSE_POSTGRES_FILE) --env-file .env logs -f postgres
 
+# Migrations
+db-migrate:
+	uv run alembic upgrade head
+
+# Server
 api-run:
 	uv run uvicorn app.api.main:app --reload
 
 api-health:
 	curl http://127.0.0.1:8000/health
 
+# Clients
+CLIENT_ID ?= 1
+CLIENT_NAME ?= company_1
+CLIENT_IS_ACTIVE ?= true
+
+client-create:
+	curl -X POST http://127.0.0.1:8000/clients \
+		-H "Content-Type: application/json" \
+		-d '{"client_id":$(CLIENT_ID),"name":"$(CLIENT_NAME)","is_active":$(CLIENT_IS_ACTIVE)}'
+
+# Pipeline 1
+INPUT_FILE ?= data/input_sample.xlsx
+
+pipeline-1:
+	curl -X POST http://127.0.0.1:8000/pipeline-1/run \
+		-F "file=@$(INPUT_FILE)"
+
+# Tests
 test:
 	uv run pytest
 
@@ -24,3 +47,4 @@ test-api:
 
 test-unit:
 	uv run pytest tests/unit
+

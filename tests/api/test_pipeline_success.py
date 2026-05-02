@@ -28,7 +28,7 @@ async def test_run_pipeline_success(
     xlsx_bytes = build_xlsx_bytes(data=data)
 
     response = await client.post(
-        '/pipeline/run',
+        '/pipeline-1/run',
         files={
             'file': (
                 'test_input.xlsx',
@@ -71,7 +71,7 @@ async def test_run_pipeline_repeat_upload(
     first_xlsx_bytes = build_xlsx_bytes(data=data)
 
     first_response = await client.post(
-        '/pipeline/run',
+        '/pipeline-1/run',
         files={
             'file': (
                 'test_input.xlsx',
@@ -97,7 +97,7 @@ async def test_run_pipeline_repeat_upload(
     second_xlsx_bytes = build_xlsx_bytes(data=data)
 
     second_response = await client.post(
-        '/pipeline/run',
+        '/pipeline-1/run',
         files={
             'file': (
                 'test_input.xlsx',
