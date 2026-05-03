@@ -1,5 +1,6 @@
 from app.db.models.analytics_run import AnalyticsRun
 from app.db.models.client_summary import ClientSummary
+from app.db.models.competitor_summary import CompetitorSummary
 from app.db.models.market_summary import MarketSummary
 
 
@@ -18,6 +19,7 @@ def build_analytics_report(
     analytics_run: AnalyticsRun,
     market_summary: MarketSummary | None,
     client_summary: ClientSummary | None,
+    competitor_summary: CompetitorSummary | None,
     city: str | None,
     profile: str | None,
 ) -> str:
@@ -26,6 +28,8 @@ def build_analytics_report(
         analytics_run (AnalyticsRun): Analytics run model.
         market_summary (MarketSummary | None): Market summary model.
         client_summary (ClientSummary | None): Client summary model.
+        competitor_summary (CompetitorSummary | None):
+            Competitor summary model.
         city (str | None): City filter.
         profile (str | None): Profile filter.
     """
@@ -57,6 +61,11 @@ def build_analytics_report(
     report_lines.extend(
         build_client_summary_section(
             client_summary=client_summary,
+        ),
+    )
+    report_lines.extend(
+        build_competitor_summary_section(
+            competitor_summary=competitor_summary,
         ),
     )
 
@@ -159,5 +168,62 @@ def build_client_summary_section(
         f'{client_summary.client_salary_specified_share}',
         f'- Client salary missing share: '
         f'{client_summary.client_salary_missing_share}',
+        '',
+    ]
+
+
+def build_competitor_summary_section(
+    competitor_summary: CompetitorSummary | None,
+) -> list[str]:
+    """Build competitor summary report section.
+    Args:
+        competitor_summary (CompetitorSummary | None):
+            Competitor summary model.
+    """
+    if competitor_summary is None:
+        return [
+            '## Competitor summary',
+            '',
+            'Competitor summary was not created because input data is empty.',
+            '',
+        ]
+
+    return [
+        '## Competitor summary',
+        '',
+        f'- Competitor company count: '
+        f'{competitor_summary.competitor_company_count}',
+        f'- Competitor snapshot count: '
+        f'{competitor_summary.competitor_snapshot_count}',
+        f'- Competitor vacancy count: '
+        f'{competitor_summary.competitor_vacancy_count}',
+        f'- Competitor total callbacks: '
+        f'{competitor_summary.competitor_total_callbacks}',
+        f'- Competitor average callbacks: '
+        f'{competitor_summary.competitor_avg_callbacks}',
+        f'- Competitor median callbacks: '
+        f'{competitor_summary.competitor_median_callbacks}',
+        f'- Competitor mode city: '
+        f'{competitor_summary.competitor_mode_city}',
+        f'- Competitor mode region: '
+        f'{competitor_summary.competitor_mode_region}',
+        f'- Competitor mode profile: '
+        f'{competitor_summary.competitor_mode_profile}',
+        f'- Competitor mode tariff: '
+        f'{competitor_summary.competitor_mode_tariff}',
+        f'- Competitor mode work schedule: '
+        f'{competitor_summary.competitor_mode_work_schedule}',
+        f'- Competitor mode work experience: '
+        f'{competitor_summary.competitor_mode_work_experience}',
+        f'- Competitor mode employment type: '
+        f'{competitor_summary.competitor_mode_employment_type}',
+        f'- Competitor median salary from: '
+        f'{competitor_summary.competitor_median_salary_from}',
+        f'- Competitor median salary to: '
+        f'{competitor_summary.competitor_median_salary_to}',
+        f'- Competitor salary specified share: '
+        f'{competitor_summary.competitor_salary_specified_share}',
+        f'- Competitor salary missing share: '
+        f'{competitor_summary.competitor_salary_missing_share}',
         '',
     ]

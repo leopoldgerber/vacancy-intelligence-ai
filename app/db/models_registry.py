@@ -17,6 +17,7 @@ def load_models() -> None:
         'app.db.models.analytics_run',
         'app.db.models.market_summary',
         'app.db.models.client_summary',
+        'app.db.models.competitor_summary',
     ]
 
     for module_path in model_modules:

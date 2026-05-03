@@ -89,6 +89,48 @@ async def load_client_snapshot_data(
     return build_snapshot_dataframe(snapshots=snapshots)
 
 
+async def load_competitor_snapshot_data(
+    session: AsyncSession,
+    client_id: int,
+    date_from: datetime,
+    date_to: datetime,
+    city: str | None,
+    profile: str | None,
+) -> pd.DataFrame:
+    """Load competitor vacancy snapshots for analytics.
+    Args:
+        session (AsyncSession): Database session.
+        client_id (int): Client identifier.
+        date_from (datetime): Analytics period start.
+        date_to (datetime): Analytics period end.
+        city (str | None): City filter.
+        profile (str | None): Profile filter.
+    """
+    statement = (
+        select(VacancySnapshot)
+        .join(Company, VacancySnapshot.company_id == Company.id)
+        .join(Client, VacancySnapshot.client_id == Client.id)
+        .where(VacancySnapshot.client_id == client_id)
+        .where(Company.client_id == Client.id)
+        .where(Company.name != Client.name)
+        .where(VacancySnapshot.date_day >= date_from)
+        .where(VacancySnapshot.date_day <= date_to)
+    )
+
+    if city is not None and city.strip():
+        statement = statement.where(VacancySnapshot.city == city.strip())
+
+    if profile is not None and profile.strip():
+        statement = statement.where(
+            VacancySnapshot.profile == profile.strip(),
+        )
+
+    result = await session.execute(statement)
+    snapshots = result.scalars().all()
+
+    return build_snapshot_dataframe(snapshots=snapshots)
+
+
 def build_snapshot_dataframe(
     snapshots: list[VacancySnapshot],
 ) -> pd.DataFrame:

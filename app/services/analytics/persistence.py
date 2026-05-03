@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models.analytics_run import AnalyticsRun
 from app.db.models.client_summary import ClientSummary
+from app.db.models.competitor_summary import CompetitorSummary
 from app.db.models.market_summary import MarketSummary
 
 
@@ -81,3 +82,21 @@ async def save_client_summary(
     await session.flush()
 
     return client_summary
+
+
+async def save_competitor_summary(
+    session: AsyncSession,
+    competitor_summary_data: dict[str, int | float | str | None],
+) -> CompetitorSummary:
+    """Save competitor summary.
+    Args:
+        session (AsyncSession): Database session.
+        competitor_summary_data (dict[str, int | float | str | None]):
+            Summary data.
+    """
+    competitor_summary = CompetitorSummary(**competitor_summary_data)
+
+    session.add(competitor_summary)
+    await session.flush()
+
+    return competitor_summary
