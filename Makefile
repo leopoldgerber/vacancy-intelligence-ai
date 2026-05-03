@@ -38,6 +38,16 @@ pipeline-1:
 	curl -X POST http://127.0.0.1:8000/pipeline-1/run \
 		-F "file=@$(INPUT_FILE)"
 
+
+# Pipeline 2 - Summary Analytics
+pipeline-2-summary:
+	curl -X POST http://127.0.0.1:8000/pipeline-2/analytics/summary/run \
+		-F "client_id=1" \
+		-F "date_from=2025-08-01" \
+		-F "date_to=2025-08-21" \
+		-F "city=" \
+		-F "profile="
+
 # Tests
 test:
 	uv run pytest

@@ -18,8 +18,8 @@ async def run_pipeline_2_summary(
     client_id: int = Form(1),
     date_from: datetime = Form('2025-08-01'),
     date_to: datetime = Form('2025-08-21'),
-    city: str | None = Form(None, examples=['Berlin']),
-    profile: str | None = Form(None, examples=['Filialleiter']),
+    city: str | None = Form('', description='Berlin'),
+    profile: str | None = Form('', description='Filialleiter'),
 ) -> AnalyticsRunResponse:
     """Run Pipeline 2 summary analytics.
     Args:
