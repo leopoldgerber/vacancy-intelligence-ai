@@ -5,9 +5,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.analytics.constants import ANALYTICS_STATUS_NO_DATA
 from app.services.analytics.constants import ANALYTICS_STATUS_SUCCESS
 from app.services.analytics.data_loaders import load_snapshot_data
+from app.services.analytics.market_summary_builders import (
+    build_market_summary_data,
+)
 from app.services.analytics.name_builders import build_analytics_name
 from app.services.analytics.name_builders import build_analytics_report_name
 from app.services.analytics.persistence import save_analytics_run
+from app.services.analytics.persistence import save_market_summary
 from app.services.analytics.report_builders import build_analytics_report
 from app.services.analytics.report_writers import save_analytics_report
 
@@ -51,6 +55,7 @@ async def run_analytics_pipeline(
         )
         report_content = build_analytics_report(
             analytics_run=analytics_run,
+            market_summary=None,
         )
         save_analytics_report(
             report_name=analytics_run.report_name,
@@ -77,8 +82,18 @@ async def run_analytics_pipeline(
         snapshot_count=snapshot_count,
         report_name=report_name,
     )
+    market_summary_data = build_market_summary_data(
+        data=snapshot_data,
+        analytics_run_id=analytics_run.id,
+        client_id=client_id,
+    )
+    market_summary = await save_market_summary(
+        session=session,
+        market_summary_data=market_summary_data,
+    )
     report_content = build_analytics_report(
         analytics_run=analytics_run,
+        market_summary=market_summary,
     )
     save_analytics_report(
         report_name=analytics_run.report_name,

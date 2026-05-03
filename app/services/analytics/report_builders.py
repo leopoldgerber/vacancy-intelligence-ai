@@ -1,10 +1,15 @@
 from app.db.models.analytics_run import AnalyticsRun
+from app.db.models.market_summary import MarketSummary
 
 
-def build_analytics_report(analytics_run: AnalyticsRun) -> str:
+def build_analytics_report(
+    analytics_run: AnalyticsRun,
+    market_summary: MarketSummary | None,
+) -> str:
     """Build analytics report content.
     Args:
         analytics_run (AnalyticsRun): Analytics run model.
+        market_summary (MarketSummary | None): Market summary model.
     """
     report_lines = [
         '# Pipeline 2 Analytics Report',
@@ -23,5 +28,51 @@ def build_analytics_report(analytics_run: AnalyticsRun) -> str:
         f'- Created at: {analytics_run.created_at}',
         '',
     ]
+
+    if market_summary is None:
+        report_lines.extend(
+            [
+                '## Market summary',
+                '',
+                'Market summary was not created because input data is empty.',
+                '',
+            ],
+        )
+
+        return '\n'.join(report_lines)
+
+    report_lines.extend(
+        [
+            '## Market summary',
+            '',
+            f'- Total snapshot count: '
+            f'{market_summary.total_snapshot_count}',
+            f'- Total company count: '
+            f'{market_summary.total_company_count}',
+            f'- Total vacancy count: '
+            f'{market_summary.total_vacancy_count}',
+            f'- Total callbacks: {market_summary.total_callbacks}',
+            f'- Average callbacks: {market_summary.avg_callbacks}',
+            f'- Median callbacks: {market_summary.median_callbacks}',
+            f'- Mode city: {market_summary.mode_city}',
+            f'- Mode region: {market_summary.mode_region}',
+            f'- Mode profile: {market_summary.mode_profile}',
+            f'- Mode tariff: {market_summary.mode_tariff}',
+            f'- Mode work schedule: '
+            f'{market_summary.mode_work_schedule}',
+            f'- Mode work experience: '
+            f'{market_summary.mode_work_experience}',
+            f'- Mode employment type: '
+            f'{market_summary.mode_employment_type}',
+            f'- Median salary from: '
+            f'{market_summary.median_salary_from}',
+            f'- Median salary to: {market_summary.median_salary_to}',
+            f'- Salary specified share: '
+            f'{market_summary.salary_specified_share}',
+            f'- Salary missing share: '
+            f'{market_summary.salary_missing_share}',
+            '',
+        ],
+    )
 
     return '\n'.join(report_lines)
