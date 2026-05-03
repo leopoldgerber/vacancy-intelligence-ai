@@ -12,7 +12,6 @@ async def run_analytics(
     date_to: datetime,
     city: str | None,
     profile: str | None,
-    company_name: str | None,
 ) -> dict[str, int | str | bool]:
     """Run analytics service.
     Args:
@@ -21,7 +20,6 @@ async def run_analytics(
         date_to (datetime): Analytics period end.
         city (str | None): City filter.
         profile (str | None): Profile filter.
-        company_name (str | None): Company name filter.
     """
     async with SessionLocal() as session:
         async with session.begin():
@@ -32,7 +30,6 @@ async def run_analytics(
                 date_to=date_to,
                 city=city,
                 profile=profile,
-                company_name=company_name,
             )
 
     return analytics_result

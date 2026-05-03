@@ -23,7 +23,6 @@ async def run_analytics_pipeline(
     date_to: datetime,
     city: str | None,
     profile: str | None,
-    company_name: str | None,
 ) -> dict[str, int | str | bool]:
     """Run analytics pipeline.
     Args:
@@ -33,7 +32,6 @@ async def run_analytics_pipeline(
         date_to (datetime): Analytics period end.
         city (str | None): City filter.
         profile (str | None): Profile filter.
-        company_name (str | None): Company name filter.
     """
     analytics_name = build_analytics_name()
     report_name = build_analytics_report_name(
@@ -46,7 +44,6 @@ async def run_analytics_pipeline(
         date_to=date_to,
         city=city,
         profile=profile,
-        company_name=company_name,
     )
     snapshot_count = len(snapshot_data)
 
@@ -67,7 +64,6 @@ async def run_analytics_pipeline(
             market_summary=None,
             city=city,
             profile=profile,
-            company_name=company_name,
         )
         save_analytics_report(
             report_name=analytics_run.report_name,
@@ -108,7 +104,6 @@ async def run_analytics_pipeline(
         market_summary=market_summary,
         city=city,
         profile=profile,
-        company_name=company_name,
     )
     save_analytics_report(
         report_name=analytics_run.report_name,

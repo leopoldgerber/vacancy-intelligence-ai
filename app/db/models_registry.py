@@ -16,6 +16,7 @@ def load_models() -> None:
         'app.db.models.quality_issue',
         'app.db.models.analytics_run',
         'app.db.models.market_summary',
+        'app.db.models.client_summary',
     ]
 
     for module_path in model_modules:
