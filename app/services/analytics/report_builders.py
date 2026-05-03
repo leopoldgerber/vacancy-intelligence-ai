@@ -2,14 +2,29 @@ from app.db.models.analytics_run import AnalyticsRun
 from app.db.models.market_summary import MarketSummary
 
 
+def format_filter_value(value: str | None) -> str:
+    """Format report filter value.
+    Args:
+        value (str | None): Filter value.
+    """
+    if value is None or not value.strip():
+        return 'all'
+
+    return value.strip()
+
+
 def build_analytics_report(
     analytics_run: AnalyticsRun,
     market_summary: MarketSummary | None,
+    city: str | None,
+    profile: str | None,
 ) -> str:
     """Build analytics report content.
     Args:
         analytics_run (AnalyticsRun): Analytics run model.
         market_summary (MarketSummary | None): Market summary model.
+        city (str | None): City filter.
+        profile (str | None): Profile filter.
     """
     report_lines = [
         '# Pipeline 2 Analytics Report',
@@ -21,6 +36,8 @@ def build_analytics_report(
         f'- Client ID: {analytics_run.client_id}',
         f'- Date from: {analytics_run.date_from}',
         f'- Date to: {analytics_run.date_to}',
+        f'- City filter: {format_filter_value(value=city)}',
+        f'- Profile filter: {format_filter_value(value=profile)}',
         f'- Status: {analytics_run.status}',
         f'- Is success: {analytics_run.is_success}',
         f'- Snapshot count: {analytics_run.snapshot_count}',

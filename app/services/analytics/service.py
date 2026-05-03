@@ -10,12 +10,16 @@ async def run_analytics(
     client_id: int,
     date_from: datetime,
     date_to: datetime,
+    city: str | None,
+    profile: str | None,
 ) -> dict[str, int | str | bool]:
     """Run analytics service.
     Args:
         client_id (int): Client identifier.
         date_from (datetime): Analytics period start.
         date_to (datetime): Analytics period end.
+        city (str | None): City filter.
+        profile (str | None): Profile filter.
     """
     async with SessionLocal() as session:
         async with session.begin():
@@ -24,6 +28,8 @@ async def run_analytics(
                 client_id=client_id,
                 date_from=date_from,
                 date_to=date_to,
+                city=city,
+                profile=profile,
             )
 
     return analytics_result

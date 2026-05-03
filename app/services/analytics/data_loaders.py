@@ -12,6 +12,8 @@ async def load_snapshot_data(
     client_id: int,
     date_from: datetime,
     date_to: datetime,
+    city: str | None,
+    profile: str | None,
 ) -> pd.DataFrame:
     """Load vacancy snapshots for analytics.
     Args:
@@ -19,6 +21,8 @@ async def load_snapshot_data(
         client_id (int): Client identifier.
         date_from (datetime): Analytics period start.
         date_to (datetime): Analytics period end.
+        city (str | None): City filter.
+        profile (str | None): Profile filter.
     """
     statement = (
         select(VacancySnapshot)
@@ -26,6 +30,14 @@ async def load_snapshot_data(
         .where(VacancySnapshot.date_day >= date_from)
         .where(VacancySnapshot.date_day <= date_to)
     )
+
+    if city is not None and city.strip():
+        statement = statement.where(VacancySnapshot.city == city.strip())
+
+    if profile is not None and profile.strip():
+        statement = statement.where(
+            VacancySnapshot.profile == profile.strip(),
+        )
 
     result = await session.execute(statement)
     snapshots = result.scalars().all()
