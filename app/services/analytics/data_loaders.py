@@ -4,6 +4,7 @@ import pandas as pd
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.db.models.company import Company
 from app.db.models.vacancy_snapshot import VacancySnapshot
 
 
@@ -14,6 +15,7 @@ async def load_snapshot_data(
     date_to: datetime,
     city: str | None,
     profile: str | None,
+    company_name: str | None,
 ) -> pd.DataFrame:
     """Load vacancy snapshots for analytics.
     Args:
@@ -23,9 +25,11 @@ async def load_snapshot_data(
         date_to (datetime): Analytics period end.
         city (str | None): City filter.
         profile (str | None): Profile filter.
+        company_name (str | None): Company name filter.
     """
     statement = (
         select(VacancySnapshot)
+        .join(Company, VacancySnapshot.company_id == Company.id)
         .where(VacancySnapshot.client_id == client_id)
         .where(VacancySnapshot.date_day >= date_from)
         .where(VacancySnapshot.date_day <= date_to)
@@ -38,6 +42,9 @@ async def load_snapshot_data(
         statement = statement.where(
             VacancySnapshot.profile == profile.strip(),
         )
+
+    if company_name is not None and company_name.strip():
+        statement = statement.where(Company.name == company_name.strip())
 
     result = await session.execute(statement)
     snapshots = result.scalars().all()

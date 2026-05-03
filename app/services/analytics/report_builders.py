@@ -18,6 +18,7 @@ def build_analytics_report(
     market_summary: MarketSummary | None,
     city: str | None,
     profile: str | None,
+    company_name: str | None,
 ) -> str:
     """Build analytics report content.
     Args:
@@ -25,6 +26,7 @@ def build_analytics_report(
         market_summary (MarketSummary | None): Market summary model.
         city (str | None): City filter.
         profile (str | None): Profile filter.
+        company_name (str | None): Company name filter.
     """
     report_lines = [
         '# Pipeline 2 Analytics Report',
@@ -38,6 +40,7 @@ def build_analytics_report(
         f'- Date to: {analytics_run.date_to}',
         f'- City filter: {format_filter_value(value=city)}',
         f'- Profile filter: {format_filter_value(value=profile)}',
+        f'- Company filter: {format_filter_value(value=company_name)}',
         f'- Status: {analytics_run.status}',
         f'- Is success: {analytics_run.is_success}',
         f'- Snapshot count: {analytics_run.snapshot_count}',
