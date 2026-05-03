@@ -2,8 +2,12 @@ from datetime import datetime
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.services.analytics.client_summary_builders import (
+    build_client_summary_data,
+)
 from app.services.analytics.constants import ANALYTICS_STATUS_NO_DATA
 from app.services.analytics.constants import ANALYTICS_STATUS_SUCCESS
+from app.services.analytics.data_loaders import load_client_snapshot_data
 from app.services.analytics.data_loaders import load_snapshot_data
 from app.services.analytics.market_summary_builders import (
     build_market_summary_data,
@@ -11,9 +15,11 @@ from app.services.analytics.market_summary_builders import (
 from app.services.analytics.name_builders import build_analytics_name
 from app.services.analytics.name_builders import build_analytics_report_name
 from app.services.analytics.persistence import save_analytics_run
+from app.services.analytics.persistence import save_client_summary
 from app.services.analytics.persistence import save_market_summary
 from app.services.analytics.report_builders import build_analytics_report
 from app.services.analytics.report_writers import save_analytics_report
+from app.services.analytics.repositories import get_client_name
 
 
 async def run_analytics_pipeline(
@@ -37,6 +43,14 @@ async def run_analytics_pipeline(
     report_name = build_analytics_report_name(
         analytics_name=analytics_name,
     )
+    client_company_name = await get_client_name(
+        session=session,
+        client_id=client_id,
+    )
+
+    if client_company_name is None:
+        client_company_name = 'unknown'
+
     snapshot_data = await load_snapshot_data(
         session=session,
         client_id=client_id,
@@ -62,6 +76,7 @@ async def run_analytics_pipeline(
         report_content = build_analytics_report(
             analytics_run=analytics_run,
             market_summary=None,
+            client_summary=None,
             city=city,
             profile=profile,
         )
@@ -90,6 +105,7 @@ async def run_analytics_pipeline(
         snapshot_count=snapshot_count,
         report_name=report_name,
     )
+
     market_summary_data = build_market_summary_data(
         data=snapshot_data,
         analytics_run_id=analytics_run.id,
@@ -99,9 +115,30 @@ async def run_analytics_pipeline(
         session=session,
         market_summary_data=market_summary_data,
     )
+
+    client_snapshot_data = await load_client_snapshot_data(
+        session=session,
+        client_id=client_id,
+        date_from=date_from,
+        date_to=date_to,
+        city=city,
+        profile=profile,
+    )
+    client_summary_data = build_client_summary_data(
+        data=client_snapshot_data,
+        analytics_run_id=analytics_run.id,
+        client_id=client_id,
+        client_company_name=client_company_name,
+    )
+    client_summary = await save_client_summary(
+        session=session,
+        client_summary_data=client_summary_data,
+    )
+
     report_content = build_analytics_report(
         analytics_run=analytics_run,
         market_summary=market_summary,
+        client_summary=client_summary,
         city=city,
         profile=profile,
     )

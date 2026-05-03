@@ -3,6 +3,7 @@ from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models.analytics_run import AnalyticsRun
+from app.db.models.client_summary import ClientSummary
 from app.db.models.market_summary import MarketSummary
 
 
@@ -62,3 +63,21 @@ async def save_market_summary(
     await session.flush()
 
     return market_summary
+
+
+async def save_client_summary(
+    session: AsyncSession,
+    client_summary_data: dict[str, int | float | str | None],
+) -> ClientSummary:
+    """Save client summary.
+    Args:
+        session (AsyncSession): Database session.
+        client_summary_data (dict[str, int | float | str | None]):
+            Summary data.
+    """
+    client_summary = ClientSummary(**client_summary_data)
+
+    session.add(client_summary)
+    await session.flush()
+
+    return client_summary
