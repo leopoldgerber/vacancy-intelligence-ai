@@ -55,6 +55,13 @@ pipeline-2-salary-features:
 		-F "date_from=2025-08-01" \
 		-F "date_to=2025-08-21"
 
+# Pipeline 2 - Publication Activity Features
+pipeline-2-publication-activity-features:
+	curl -X POST http://127.0.0.1:8000/pipeline-2/features/publication-activity/run \
+		-F "client_id=1" \
+		-F "date_from=2025-08-01" \
+		-F "date_to=2025-08-21"
+
 # Tests
 test:
 	uv run pytest

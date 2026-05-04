@@ -3,6 +3,9 @@ from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models.feature_run import FeatureRun
+from app.db.models.publication_activity_feature import (
+    PublicationActivityFeature,
+)
 from app.db.models.salary_feature import SalaryFeature
 
 
@@ -68,3 +71,26 @@ async def save_salary_features(
     await session.flush()
 
     return salary_features
+
+
+async def save_publication_activity_features(
+    session: AsyncSession,
+    publication_activity_feature_rows: list[dict[str, int | datetime]],
+) -> list[PublicationActivityFeature]:
+    """Save publication activity feature rows.
+    Args:
+        session (AsyncSession): Database session.
+        publication_activity_feature_rows (list[dict[str, int | datetime]]):
+            Publication activity feature rows.
+    """
+    publication_activity_features = [
+        PublicationActivityFeature(**publication_activity_feature_row)
+        for publication_activity_feature_row in (
+            publication_activity_feature_rows
+        )
+    ]
+
+    session.add_all(publication_activity_features)
+    await session.flush()
+
+    return publication_activity_features

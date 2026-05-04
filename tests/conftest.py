@@ -29,6 +29,9 @@ from app.db.models.vacancy_snapshot import VacancySnapshot  # noqa
 from app.db.session import SessionLocal  # noqa
 from app.db.session import engine  # noqa
 from app.db.session import get_session  # noqa
+from app.db.models.publication_activity_feature import (  # noqa
+    PublicationActivityFeature,
+)  # noqa
 
 
 async def clear_tables(session: AsyncSession) -> None:
@@ -37,6 +40,7 @@ async def clear_tables(session: AsyncSession) -> None:
         session (AsyncSession): Async database session.
     """
     delete_statements = [
+        delete(PublicationActivityFeature),
         delete(SalaryFeature),
         delete(FeatureRun),
         delete(CompetitorSummary),
