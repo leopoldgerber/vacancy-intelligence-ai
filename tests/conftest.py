@@ -17,9 +17,11 @@ from app.db.models.client import Client  # noqa
 from app.db.models.client_summary import ClientSummary  # noqa
 from app.db.models.company import Company  # noqa
 from app.db.models.competitor_summary import CompetitorSummary  # noqa
+from app.db.models.feature_run import FeatureRun  # noqa
 from app.db.models.market_summary import MarketSummary  # noqa
 from app.db.models.quality_issue import QualityIssue  # noqa
 from app.db.models.quality_run import QualityRun  # noqa
+from app.db.models.salary_feature import SalaryFeature  # noqa
 from app.db.models.validation_issue import ValidationIssue  # noqa
 from app.db.models.validation_run import ValidationRun  # noqa
 from app.db.models.vacancy import Vacancy  # noqa
@@ -35,6 +37,8 @@ async def clear_tables(session: AsyncSession) -> None:
         session (AsyncSession): Async database session.
     """
     delete_statements = [
+        delete(SalaryFeature),
+        delete(FeatureRun),
         delete(CompetitorSummary),
         delete(ClientSummary),
         delete(MarketSummary),
