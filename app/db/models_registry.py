@@ -18,6 +18,8 @@ def load_models() -> None:
         'app.db.models.market_summary',
         'app.db.models.client_summary',
         'app.db.models.competitor_summary',
+        'app.db.models.feature_run',
+        'app.db.models.salary_feature',
     ]
 
     for module_path in model_modules:
