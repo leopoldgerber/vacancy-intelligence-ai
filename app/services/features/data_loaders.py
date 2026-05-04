@@ -40,6 +40,9 @@ async def load_feature_snapshot_data(
             'salary_to': snapshot.salary_to,
             'city': snapshot.city,
             'profile': snapshot.profile,
+            'standard': snapshot.standard,
+            'standard_plus': snapshot.standard_plus,
+            'premium': snapshot.premium,
         }
         for snapshot in snapshots
     ]
