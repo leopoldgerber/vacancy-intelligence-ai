@@ -43,6 +43,8 @@ async def load_feature_snapshot_data(
             'standard': snapshot.standard,
             'standard_plus': snapshot.standard_plus,
             'premium': snapshot.premium,
+            'vacancy_title': snapshot.vacancy_title,
+            'vacancy_description': snapshot.vacancy_description,
         }
         for snapshot in snapshots
     ]

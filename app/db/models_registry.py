@@ -21,6 +21,7 @@ def load_models() -> None:
         'app.db.models.feature_run',
         'app.db.models.salary_feature',
         'app.db.models.publication_activity_feature',
+        'app.db.models.text_feature',
     ]
 
     for module_path in model_modules:

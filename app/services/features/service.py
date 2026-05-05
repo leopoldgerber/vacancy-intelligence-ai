@@ -7,6 +7,9 @@ from app.services.features.run_publication_activity_features_pipeline import (
 from app.services.features.run_salary_features_pipeline import (
     run_salary_features_pipeline,
 )
+from app.services.features.run_text_features_pipeline import (
+    run_text_features_pipeline,
+)
 
 
 async def run_salary_features(
@@ -52,6 +55,29 @@ async def run_publication_activity_features(
                     date_from=date_from,
                     date_to=date_to,
                 )
+            )
+
+    return feature_result
+
+
+async def run_text_features(
+    client_id: int,
+    date_from: datetime,
+    date_to: datetime,
+) -> dict[str, int | str | bool]:
+    """Run text feature engineering service.
+    Args:
+        client_id (int): Client identifier.
+        date_from (datetime): Feature period start.
+        date_to (datetime): Feature period end.
+    """
+    async with SessionLocal() as session:
+        async with session.begin():
+            feature_result = await run_text_features_pipeline(
+                session=session,
+                client_id=client_id,
+                date_from=date_from,
+                date_to=date_to,
             )
 
     return feature_result
