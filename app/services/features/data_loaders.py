@@ -36,6 +36,7 @@ async def load_feature_snapshot_data(
             'company_id': snapshot.company_id,
             'vacancy_id': snapshot.vacancy_id,
             'date_day': snapshot.date_day,
+            'publication_date': snapshot.publication_date,
             'salary_from': snapshot.salary_from,
             'salary_to': snapshot.salary_to,
             'city': snapshot.city,

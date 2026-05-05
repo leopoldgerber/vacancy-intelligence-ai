@@ -8,6 +8,7 @@ from app.db.models.publication_activity_feature import (
 )
 from app.db.models.salary_feature import SalaryFeature
 from app.db.models.text_feature import TextFeature
+from app.db.models.time_feature import TimeFeature
 
 
 async def save_feature_run(
@@ -116,3 +117,24 @@ async def save_text_features(
     await session.flush()
 
     return text_features
+
+
+async def save_time_features(
+    session: AsyncSession,
+    time_feature_rows: list[dict[str, int | bool | datetime]],
+) -> list[TimeFeature]:
+    """Save time feature rows.
+    Args:
+        session (AsyncSession): Database session.
+        time_feature_rows (list[dict[str, int | bool | datetime]]):
+            Time feature rows.
+    """
+    time_features = [
+        TimeFeature(**time_feature_row)
+        for time_feature_row in time_feature_rows
+    ]
+
+    session.add_all(time_features)
+    await session.flush()
+
+    return time_features
