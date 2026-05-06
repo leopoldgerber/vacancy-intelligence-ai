@@ -69,6 +69,13 @@ pipeline-2-text-features:
 		-F "date_from=2025-08-01" \
 		-F "date_to=2025-08-21"
 
+# Pipeline 2 - Time Features
+pipeline-2-time-features:
+	curl -X POST http://127.0.0.1:8000/pipeline-2/features/time/run \
+		-F "client_id=1" \
+		-F "date_from=2025-08-01" \
+		-F "date_to=2025-08-21"
+
 # Full local data setup
 local-data-setup:
 	$(MAKE) client-create
@@ -77,6 +84,7 @@ local-data-setup:
 	$(MAKE) pipeline-2-salary-features
 	$(MAKE) pipeline-2-publication-activity-features
 	$(MAKE) pipeline-2-text-features
+	$(MAKE) pipeline-2-time-features
 
 # Tests
 test:

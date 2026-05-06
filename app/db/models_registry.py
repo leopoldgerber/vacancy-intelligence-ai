@@ -23,6 +23,7 @@ def load_models() -> None:
         'app.db.models.publication_activity_feature',
         'app.db.models.text_feature',
         'app.db.models.time_feature',
+        'app.db.models.categorical_feature',
     ]
 
     for module_path in model_modules:

@@ -33,6 +33,7 @@ from app.db.models.publication_activity_feature import (  # noqa
     PublicationActivityFeature,
 )  # noqa
 from app.db.models.text_feature import TextFeature  # noqa
+from app.db.models.time_feature import TimeFeature  # noqa
 
 
 async def clear_tables(session: AsyncSession) -> None:
@@ -41,6 +42,7 @@ async def clear_tables(session: AsyncSession) -> None:
         session (AsyncSession): Async database session.
     """
     delete_statements = [
+        delete(TimeFeature),
         delete(TextFeature),
         delete(PublicationActivityFeature),
         delete(SalaryFeature),

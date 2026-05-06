@@ -2,6 +2,7 @@ from datetime import datetime
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.db.models.categorical_feature import CategoricalFeature
 from app.db.models.feature_run import FeatureRun
 from app.db.models.publication_activity_feature import (
     PublicationActivityFeature,
@@ -138,3 +139,24 @@ async def save_time_features(
     await session.flush()
 
     return time_features
+
+
+async def save_categorical_features(
+    session: AsyncSession,
+    categorical_feature_rows: list[dict[str, int | str | datetime]],
+) -> list[CategoricalFeature]:
+    """Save categorical feature rows.
+    Args:
+        session (AsyncSession): Database session.
+        categorical_feature_rows (list[dict[str, int | str | datetime]]):
+            Categorical feature rows.
+    """
+    categorical_features = [
+        CategoricalFeature(**categorical_feature_row)
+        for categorical_feature_row in categorical_feature_rows
+    ]
+
+    session.add_all(categorical_features)
+    await session.flush()
+
+    return categorical_features
