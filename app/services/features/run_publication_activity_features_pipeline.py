@@ -29,7 +29,9 @@ async def run_publication_activity_features_pipeline(
         date_from (datetime): Feature period start.
         date_to (datetime): Feature period end.
     """
-    feature_run_name = build_feature_run_name()
+    feature_run_name = build_feature_run_name(
+        feature_group='publication_activity_features'
+    )
     report_name = build_feature_report_name(
         feature_run_name=feature_run_name,
     )

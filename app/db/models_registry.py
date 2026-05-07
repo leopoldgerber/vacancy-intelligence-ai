@@ -24,6 +24,8 @@ def load_models() -> None:
         'app.db.models.text_feature',
         'app.db.models.time_feature',
         'app.db.models.categorical_feature',
+        'app.db.models.ml_dataset_run',
+        'app.db.models.ml_feature_row',
     ]
 
     for module_path in model_modules:
