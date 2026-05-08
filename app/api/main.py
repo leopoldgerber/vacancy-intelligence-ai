@@ -7,6 +7,7 @@ from app.api.routes.pipeline_1 import router as pipeline_router
 from app.api.routes.validation import router as validation_router
 from app.api.routes.analytics import router as analytics_router
 from app.api.routes.features import router as features_router
+from app.api.routes.ml_dataset import router as ml_dataset_router
 
 
 app = FastAPI(title='vacancy-intelligence-ai')
@@ -19,3 +20,4 @@ app.include_router(validation_router)
 app.include_router(pipeline_router)
 app.include_router(analytics_router)
 app.include_router(features_router)
+app.include_router(ml_dataset_router)
