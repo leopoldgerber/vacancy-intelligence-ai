@@ -90,6 +90,13 @@ pipeline-2-ml-dataset:
 		-F "date_from=2025-08-01" \
 		-F "date_to=2025-08-21"
 
+# Pipeline 2 - Full Run
+pipeline-2:
+	curl -X POST http://127.0.0.1:8000/pipeline-2/run \
+		-F "client_id=1" \
+		-F "date_from=2025-08-01" \
+		-F "date_to=2025-08-21"
+
 # Full local data setup
 local-data-setup:
 	$(MAKE) client-create
@@ -101,6 +108,11 @@ local-data-setup:
 	$(MAKE) pipeline-2-time-features
 	$(MAKE) pipeline-2-categorical-features
 	$(MAKE) pipeline-2-ml-dataset
+
+# local-data-setup:
+# 	$(MAKE) client-create
+# 	$(MAKE) pipeline-1
+# 	$(MAKE) pipeline-2
 
 # Tests
 test:
