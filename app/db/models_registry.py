@@ -26,6 +26,7 @@ def load_models() -> None:
         'app.db.models.categorical_feature',
         'app.db.models.ml_dataset_run',
         'app.db.models.ml_feature_row',
+        'app.db.models.ml_training_run',
     ]
 
     for module_path in model_modules:
