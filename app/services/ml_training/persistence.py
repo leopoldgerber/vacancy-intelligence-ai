@@ -1,3 +1,5 @@
+from typing import Any
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models.ml_training_run import MlTrainingRun
@@ -10,6 +12,7 @@ async def save_ml_training_run(
     client_id: int,
     model_type: str,
     target_name: str,
+    model_params_json: dict[str, Any] | None,
     status: str,
     is_success: bool,
     train_row_count: int,
@@ -17,6 +20,8 @@ async def save_ml_training_run(
     metric_mae: float | None,
     metric_rmse: float | None,
     metric_r2: float | None,
+    baseline_mae: float | None,
+    mean_target: float | None,
     model_path: str | None,
     report_name: str | None,
 ) -> MlTrainingRun:
@@ -28,6 +33,7 @@ async def save_ml_training_run(
         client_id (int): Client identifier.
         model_type (str): Model type.
         target_name (str): Target name.
+        model_params_json (dict[str, Any] | None): Model parameters.
         status (str): Training run status.
         is_success (bool): Whether training run is successful.
         train_row_count (int): Number of train rows.
@@ -35,6 +41,8 @@ async def save_ml_training_run(
         metric_mae (float | None): MAE metric.
         metric_rmse (float | None): RMSE metric.
         metric_r2 (float | None): R2 metric.
+        baseline_mae (float | None): Baseline MAE metric.
+        mean_target (float | None): Mean train target.
         model_path (str | None): Saved model path.
         report_name (str | None): Training report name.
     """
@@ -44,6 +52,7 @@ async def save_ml_training_run(
         client_id=client_id,
         model_type=model_type,
         target_name=target_name,
+        model_params_json=model_params_json,
         status=status,
         is_success=is_success,
         train_row_count=train_row_count,
@@ -51,6 +60,8 @@ async def save_ml_training_run(
         metric_mae=metric_mae,
         metric_rmse=metric_rmse,
         metric_r2=metric_r2,
+        baseline_mae=baseline_mae,
+        mean_target=mean_target,
         model_path=model_path,
         report_name=report_name,
     )

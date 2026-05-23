@@ -1,25 +1,24 @@
 import numpy as np
 from catboost import CatBoostRegressor
 
-from app.services.ml_training.constants import RANDOM_SEED
 from app.services.ml_training.dataset_builders import TrainingDataset
 from app.services.ml_training.metric_builders import calculate_training_metrics
+from app.services.ml_training.model_configs import get_catboost_baseline_params
 from app.services.ml_training.split_builders import TrainingSplit
 
 
-def build_catboost_model() -> CatBoostRegressor:
+def build_catboost_model(
+    model_params: dict[str, int | float | str | bool] | None = None,
+) -> CatBoostRegressor:
     """Build CatBoost regressor model.
     Args:
-        """
-    return CatBoostRegressor(
-        iterations=100,
-        learning_rate=0.05,
-        depth=6,
-        loss_function='RMSE',
-        random_seed=RANDOM_SEED,
-        verbose=False,
-        allow_writing_files=False,
-    )
+        model_params (dict[str, int | float | str | bool] | None):
+            Model params.
+    """
+    if model_params is None:
+        model_params = get_catboost_baseline_params()
+
+    return CatBoostRegressor(**model_params)
 
 
 def train_catboost_model(
@@ -31,7 +30,8 @@ def train_catboost_model(
     Args:
         model (CatBoostRegressor): CatBoost model instance.
         dataset (TrainingDataset): Prepared training dataset.
-        split (TrainingSplit): Prepared train/test split."""
+        split (TrainingSplit): Prepared train/test split.
+    """
     model.fit(
         split.train_features,
         split.train_target,
@@ -48,7 +48,8 @@ def predict_model(
     """Predict target values with trained model.
     Args:
         model (CatBoostRegressor): Trained CatBoost model.
-        split (TrainingSplit): Prepared train/test split."""
+        split (TrainingSplit): Prepared train/test split.
+    """
     predictions = model.predict(split.test_features)
 
     return np.asarray(predictions)
@@ -61,8 +62,10 @@ def train_and_evaluate_catboost(
     """Train and evaluate CatBoost regressor.
     Args:
         dataset (TrainingDataset): Prepared training dataset.
-        split (TrainingSplit): Prepared train/test split."""
-    model = build_catboost_model()
+        split (TrainingSplit): Prepared train/test split.
+    """
+    model_params = get_catboost_baseline_params()
+    model = build_catboost_model(model_params=model_params)
 
     trained_model = train_catboost_model(
         model=model,
@@ -81,6 +84,7 @@ def train_and_evaluate_catboost(
 
     return {
         'model': trained_model,
+        'model_params': model_params,
         'predictions': predictions,
         'metrics': metrics,
     }

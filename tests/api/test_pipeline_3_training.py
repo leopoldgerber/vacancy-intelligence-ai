@@ -5,6 +5,17 @@ from httpx import AsyncClient
 from app.api.main import app
 
 
+CATBOOST_BASELINE_PARAMS = {
+    'iterations': 100,
+    'learning_rate': 0.05,
+    'depth': 6,
+    'loss_function': 'RMSE',
+    'random_seed': 42,
+    'verbose': False,
+    'allow_writing_files': False,
+}
+
+
 @pytest.mark.asyncio
 async def test_pipeline_3_training_success(
     monkeypatch: pytest.MonkeyPatch
@@ -16,7 +27,7 @@ async def test_pipeline_3_training_success(
     async def mock_run_ml_training(
         client_id: int,
         ml_dataset_run_id: int | None = None,
-    ) -> dict[str, int | str | bool | float | None]:
+    ) -> dict[str, int | str | bool | float | dict[str, object] | None]:
         """Mock ML training service.
         Args:
             client_id (int): Client identifier.
@@ -32,11 +43,14 @@ async def test_pipeline_3_training_success(
             'is_success': True,
             'model_type': 'catboost_regressor',
             'target_name': 'callbacks',
+            'model_params_json': CATBOOST_BASELINE_PARAMS,
             'train_row_count': 80,
             'test_row_count': 20,
             'metric_mae': 0.3,
             'metric_rmse': 0.6,
             'metric_r2': 0.1,
+            'baseline_mae': 0.4,
+            'mean_target': 10.0,
             'model_path': (
                 'artifacts/models/pipeline_3/ml_training_test.cbm'
             ),
@@ -73,11 +87,14 @@ async def test_pipeline_3_training_success(
         'is_success': True,
         'model_type': 'catboost_regressor',
         'target_name': 'callbacks',
+        'model_params_json': CATBOOST_BASELINE_PARAMS,
         'train_row_count': 80,
         'test_row_count': 20,
         'metric_mae': 0.3,
         'metric_rmse': 0.6,
         'metric_r2': 0.1,
+        'baseline_mae': 0.4,
+        'mean_target': 10.0,
         'model_path': 'artifacts/models/pipeline_3/ml_training_test.cbm',
         'report_name': 'ml_training_test.md',
     }
@@ -94,7 +111,7 @@ async def test_pipeline_3_training_with_dataset_run_id(
     async def mock_run_ml_training(
         client_id: int,
         ml_dataset_run_id: int | None = None,
-    ) -> dict[str, int | str | bool | float | None]:
+    ) -> dict[str, int | str | bool | float | dict[str, object] | None]:
         """Mock ML training service.
         Args:
             client_id (int): Client identifier.
@@ -110,11 +127,14 @@ async def test_pipeline_3_training_with_dataset_run_id(
             'is_success': True,
             'model_type': 'catboost_regressor',
             'target_name': 'callbacks',
+            'model_params_json': CATBOOST_BASELINE_PARAMS,
             'train_row_count': 3349,
             'test_row_count': 998,
             'metric_mae': 0.3208829917467808,
             'metric_rmse': 0.6562405923499849,
             'metric_r2': 0.0023936394210444245,
+            'baseline_mae': 0.321,
+            'mean_target': 0.42,
             'model_path': (
                 'artifacts/models/pipeline_3/'
                 'ml_training_test_with_dataset.cbm'
@@ -145,25 +165,26 @@ async def test_pipeline_3_training_with_dataset_run_id(
 
     response_data = response.json()
 
-    assert response_data['ml_training_run_id'] == 2
-    assert response_data['training_run_name'] == (
-        'ml_training_test_with_dataset'
-    )
-    assert response_data['status'] == 'success'
-    assert response_data['is_success'] is True
-    assert response_data['model_type'] == 'catboost_regressor'
-    assert response_data['target_name'] == 'callbacks'
-    assert response_data['train_row_count'] == 3349
-    assert response_data['test_row_count'] == 998
-    assert response_data['metric_mae'] == 0.3208829917467808
-    assert response_data['metric_rmse'] == 0.6562405923499849
-    assert response_data['metric_r2'] == 0.0023936394210444245
-    assert response_data['model_path'] == (
-        'artifacts/models/pipeline_3/ml_training_test_with_dataset.cbm'
-    )
-    assert response_data['report_name'] == (
-        'ml_training_test_with_dataset.md'
-    )
+    assert response_data == {
+        'ml_training_run_id': 2,
+        'training_run_name': 'ml_training_test_with_dataset',
+        'status': 'success',
+        'is_success': True,
+        'model_type': 'catboost_regressor',
+        'target_name': 'callbacks',
+        'model_params_json': CATBOOST_BASELINE_PARAMS,
+        'train_row_count': 3349,
+        'test_row_count': 998,
+        'metric_mae': 0.3208829917467808,
+        'metric_rmse': 0.6562405923499849,
+        'metric_r2': 0.0023936394210444245,
+        'baseline_mae': 0.321,
+        'mean_target': 0.42,
+        'model_path': (
+            'artifacts/models/pipeline_3/ml_training_test_with_dataset.cbm'
+        ),
+        'report_name': 'ml_training_test_with_dataset.md',
+    }
 
 
 @pytest.mark.asyncio
@@ -177,7 +198,7 @@ async def test_pipeline_3_training_no_data(
     async def mock_run_ml_training(
         client_id: int,
         ml_dataset_run_id: int | None = None,
-    ) -> dict[str, int | str | bool | float | None]:
+    ) -> dict[str, int | str | bool | float | dict[str, object] | None]:
         """Mock ML training service.
         Args:
             client_id (int): Client identifier.
@@ -193,11 +214,14 @@ async def test_pipeline_3_training_no_data(
             'is_success': False,
             'model_type': 'catboost_regressor',
             'target_name': 'callbacks',
+            'model_params_json': CATBOOST_BASELINE_PARAMS,
             'train_row_count': 0,
             'test_row_count': 0,
             'metric_mae': None,
             'metric_rmse': None,
             'metric_r2': None,
+            'baseline_mae': None,
+            'mean_target': None,
             'model_path': None,
             'report_name': 'ml_training_no_data.md',
         }
@@ -232,11 +256,14 @@ async def test_pipeline_3_training_no_data(
         'is_success': False,
         'model_type': 'catboost_regressor',
         'target_name': 'callbacks',
+        'model_params_json': CATBOOST_BASELINE_PARAMS,
         'train_row_count': 0,
         'test_row_count': 0,
         'metric_mae': None,
         'metric_rmse': None,
         'metric_r2': None,
+        'baseline_mae': None,
+        'mean_target': None,
         'model_path': None,
         'report_name': 'ml_training_no_data.md',
     }
