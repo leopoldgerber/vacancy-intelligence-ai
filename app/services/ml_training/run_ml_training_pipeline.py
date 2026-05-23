@@ -15,6 +15,10 @@ from app.services.ml_training.name_builders import (
     build_ml_training_report_name)
 from app.services.ml_training.name_builders import build_ml_training_run_name
 from app.services.ml_training.persistence import save_ml_training_run
+from app.services.ml_training.report_builders import (
+    build_ml_training_report_content,
+)
+from app.services.ml_training.report_builders import save_ml_training_report
 from app.services.ml_training.split_builders import build_training_split
 
 
@@ -66,6 +70,57 @@ def build_training_result(
     }
 
 
+def save_training_report_from_values(
+    training_run_name: str,
+    ml_dataset_run_id: int | None,
+    client_id: int,
+    status: str,
+    is_success: bool,
+    train_row_count: int,
+    test_row_count: int,
+    metric_mae: float | None,
+    metric_rmse: float | None,
+    metric_r2: float | None,
+    model_path: str | None,
+    report_name: str,
+) -> str:
+    """Save ML training report from values.
+    Args:
+        training_run_name (str): ML training run name.
+        ml_dataset_run_id (int | None): ML dataset run identifier.
+        client_id (int): Client identifier.
+        status (str): Training status.
+        is_success (bool): Whether training run was successful.
+        train_row_count (int): Number of train rows.
+        test_row_count (int): Number of test rows.
+        metric_mae (float | None): MAE metric.
+        metric_rmse (float | None): RMSE metric.
+        metric_r2 (float | None): R2 metric.
+        model_path (str | None): Model artifact path.
+        report_name (str): Report file name.
+    """
+    report_content = build_ml_training_report_content(
+        training_run_name=training_run_name,
+        ml_dataset_run_id=ml_dataset_run_id,
+        client_id=client_id,
+        status=status,
+        is_success=is_success,
+        model_type=ML_MODEL_TYPE_CATBOOST_REGRESSOR,
+        target_name=ML_TARGET_CALLBACKS,
+        train_row_count=train_row_count,
+        test_row_count=test_row_count,
+        metric_mae=metric_mae,
+        metric_rmse=metric_rmse,
+        metric_r2=metric_r2,
+        model_path=model_path,
+    )
+
+    return save_ml_training_report(
+        report_name=report_name,
+        report_content=report_content,
+    )
+
+
 async def save_no_data_training_run(
     session: AsyncSession,
     training_run_name: str,
@@ -81,6 +136,21 @@ async def save_no_data_training_run(
         client_id (int): Client identifier.
         report_name (str): Training report name.
     """
+    save_training_report_from_values(
+        training_run_name=training_run_name,
+        ml_dataset_run_id=ml_dataset_run_id,
+        client_id=client_id,
+        status=ML_TRAINING_STATUS_NO_DATA,
+        is_success=False,
+        train_row_count=0,
+        test_row_count=0,
+        metric_mae=None,
+        metric_rmse=None,
+        metric_r2=None,
+        model_path=None,
+        report_name=report_name,
+    )
+
     ml_training_run = await save_ml_training_run(
         session=session,
         training_run_name=training_run_name,
@@ -131,6 +201,21 @@ async def save_failed_training_run(
         client_id (int): Client identifier.
         report_name (str): Training report name.
     """
+    save_training_report_from_values(
+        training_run_name=training_run_name,
+        ml_dataset_run_id=ml_dataset_run_id,
+        client_id=client_id,
+        status=ML_TRAINING_STATUS_FAILED,
+        is_success=False,
+        train_row_count=0,
+        test_row_count=0,
+        metric_mae=None,
+        metric_rmse=None,
+        metric_r2=None,
+        model_path=None,
+        report_name=report_name,
+    )
+
     ml_training_run = await save_ml_training_run(
         session=session,
         training_run_name=training_run_name,
@@ -243,6 +328,21 @@ async def run_ml_training_pipeline(
             client_id=client_id,
             report_name=report_name,
         )
+
+    save_training_report_from_values(
+        training_run_name=training_run_name,
+        ml_dataset_run_id=ml_dataset_run.id,
+        client_id=client_id,
+        status=ML_TRAINING_STATUS_SUCCESS,
+        is_success=True,
+        train_row_count=split.train_row_count,
+        test_row_count=split.test_row_count,
+        metric_mae=metrics['metric_mae'],
+        metric_rmse=metrics['metric_rmse'],
+        metric_r2=metrics['metric_r2'],
+        model_path=model_path,
+        report_name=report_name,
+    )
 
     ml_training_run = await save_ml_training_run(
         session=session,

@@ -37,6 +37,7 @@ from app.db.models.time_feature import TimeFeature  # noqa
 from app.db.models.categorical_feature import CategoricalFeature  # noqa
 from app.db.models.ml_dataset_run import MlDatasetRun  # noqa
 from app.db.models.ml_feature_row import MlFeatureRow  # noqa
+from app.db.models.ml_training_run import MlTrainingRun  # noqa
 
 
 async def clear_tables(session: AsyncSession) -> None:
@@ -45,6 +46,7 @@ async def clear_tables(session: AsyncSession) -> None:
         session (AsyncSession): Async database session.
     """
     delete_statements = [
+        delete(MlTrainingRun),
         delete(MlFeatureRow),
         delete(MlDatasetRun),
         delete(CategoricalFeature),
