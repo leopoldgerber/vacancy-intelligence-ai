@@ -1,10 +1,12 @@
 from datetime import datetime
+from typing import Any
 
 from sqlalchemy import Boolean
 from sqlalchemy import DateTime
 from sqlalchemy import Float
 from sqlalchemy import ForeignKey
 from sqlalchemy import Integer
+from sqlalchemy import JSON
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
@@ -42,6 +44,10 @@ class MlTrainingRun(Base):
         String(128),
         nullable=False,
     )
+    model_params_json: Mapped[dict[str, Any] | None] = mapped_column(
+        JSON,
+        nullable=True,
+    )
     status: Mapped[str] = mapped_column(
         String(64),
         nullable=False,
@@ -69,6 +75,14 @@ class MlTrainingRun(Base):
         nullable=True,
     )
     metric_r2: Mapped[float | None] = mapped_column(
+        Float,
+        nullable=True,
+    )
+    baseline_mae: Mapped[float | None] = mapped_column(
+        Float,
+        nullable=True,
+    )
+    mean_target: Mapped[float | None] = mapped_column(
         Float,
         nullable=True,
     )
