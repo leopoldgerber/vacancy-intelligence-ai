@@ -2,6 +2,9 @@ import numpy as np
 from catboost import CatBoostRegressor
 
 from app.services.ml_training.dataset_builders import TrainingDataset
+from app.services.ml_training.feature_importance_builders import (
+    build_feature_importance_json,
+)
 from app.services.ml_training.metric_builders import calculate_training_metrics
 from app.services.ml_training.model_configs import get_catboost_baseline_params
 from app.services.ml_training.split_builders import TrainingSplit
@@ -81,10 +84,15 @@ def train_and_evaluate_catboost(
         test_target=split.test_target,
         predictions=predictions,
     )
+    feature_importance_json = build_feature_importance_json(
+        model=trained_model,
+        dataset=dataset,
+    )
 
     return {
         'model': trained_model,
         'model_params': model_params,
+        'feature_importance_json': feature_importance_json,
         'predictions': predictions,
         'metrics': metrics,
     }
