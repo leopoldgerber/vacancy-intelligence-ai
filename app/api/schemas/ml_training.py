@@ -13,6 +13,7 @@ class MlTrainingRunResponse(BaseModel):
     model_type: str
     target_name: str
     model_params_json: dict[str, Any] | None
+    feature_importance_json: dict[str, Any] | None
     train_row_count: int
     test_row_count: int
     metric_mae: float | None

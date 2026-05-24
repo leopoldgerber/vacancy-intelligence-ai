@@ -33,6 +33,7 @@ def build_training_result(
     model_type: str,
     target_name: str,
     model_params_json: dict[str, Any] | None,
+    feature_importance_json: dict[str, Any] | None,
     train_row_count: int,
     test_row_count: int,
     metric_mae: float | None,
@@ -52,6 +53,7 @@ def build_training_result(
         model_type (str): Model type.
         target_name (str): Target name.
         model_params_json (dict[str, Any] | None): Model parameters.
+        feature_importance_json (dict[str, Any] | None): Feature importance.
         train_row_count (int): Number of train rows.
         test_row_count (int): Number of test rows.
         metric_mae (float | None): MAE metric.
@@ -70,6 +72,7 @@ def build_training_result(
         'model_type': model_type,
         'target_name': target_name,
         'model_params_json': model_params_json,
+        'feature_importance_json': feature_importance_json,
         'train_row_count': train_row_count,
         'test_row_count': test_row_count,
         'metric_mae': metric_mae,
@@ -89,6 +92,7 @@ def save_training_report_from_values(
     status: str,
     is_success: bool,
     model_params_json: dict[str, Any] | None,
+    feature_importance_json: dict[str, Any] | None,
     train_row_count: int,
     test_row_count: int,
     metric_mae: float | None,
@@ -107,6 +111,7 @@ def save_training_report_from_values(
         status (str): Training status.
         is_success (bool): Whether training run was successful.
         model_params_json (dict[str, Any] | None): Model parameters.
+        feature_importance_json (dict[str, Any] | None): Feature importance.
         train_row_count (int): Number of train rows.
         test_row_count (int): Number of test rows.
         metric_mae (float | None): MAE metric.
@@ -126,6 +131,7 @@ def save_training_report_from_values(
         model_type=ML_MODEL_TYPE_CATBOOST_REGRESSOR,
         target_name=ML_TARGET_CALLBACKS,
         model_params_json=model_params_json,
+        feature_importance_json=feature_importance_json,
         train_row_count=train_row_count,
         test_row_count=test_row_count,
         metric_mae=metric_mae,
@@ -158,6 +164,7 @@ async def save_no_data_training_run(
         report_name (str): Training report name.
     """
     model_params_json = get_catboost_baseline_params()
+    feature_importance_json = None
 
     save_training_report_from_values(
         training_run_name=training_run_name,
@@ -166,6 +173,7 @@ async def save_no_data_training_run(
         status=ML_TRAINING_STATUS_NO_DATA,
         is_success=False,
         model_params_json=model_params_json,
+        feature_importance_json=feature_importance_json,
         train_row_count=0,
         test_row_count=0,
         metric_mae=None,
@@ -185,6 +193,7 @@ async def save_no_data_training_run(
         model_type=ML_MODEL_TYPE_CATBOOST_REGRESSOR,
         target_name=ML_TARGET_CALLBACKS,
         model_params_json=model_params_json,
+        feature_importance_json=feature_importance_json,
         status=ML_TRAINING_STATUS_NO_DATA,
         is_success=False,
         train_row_count=0,
@@ -206,6 +215,7 @@ async def save_no_data_training_run(
         model_type=ml_training_run.model_type,
         target_name=ml_training_run.target_name,
         model_params_json=ml_training_run.model_params_json,
+        feature_importance_json=ml_training_run.feature_importance_json,
         train_row_count=ml_training_run.train_row_count,
         test_row_count=ml_training_run.test_row_count,
         metric_mae=ml_training_run.metric_mae,
@@ -234,6 +244,7 @@ async def save_failed_training_run(
         report_name (str): Training report name.
     """
     model_params_json = get_catboost_baseline_params()
+    feature_importance_json = None
 
     save_training_report_from_values(
         training_run_name=training_run_name,
@@ -242,6 +253,7 @@ async def save_failed_training_run(
         status=ML_TRAINING_STATUS_FAILED,
         is_success=False,
         model_params_json=model_params_json,
+        feature_importance_json=feature_importance_json,
         train_row_count=0,
         test_row_count=0,
         metric_mae=None,
@@ -261,6 +273,7 @@ async def save_failed_training_run(
         model_type=ML_MODEL_TYPE_CATBOOST_REGRESSOR,
         target_name=ML_TARGET_CALLBACKS,
         model_params_json=model_params_json,
+        feature_importance_json=feature_importance_json,
         status=ML_TRAINING_STATUS_FAILED,
         is_success=False,
         train_row_count=0,
@@ -282,6 +295,7 @@ async def save_failed_training_run(
         model_type=ml_training_run.model_type,
         target_name=ml_training_run.target_name,
         model_params_json=ml_training_run.model_params_json,
+        feature_importance_json=ml_training_run.feature_importance_json,
         train_row_count=ml_training_run.train_row_count,
         test_row_count=ml_training_run.test_row_count,
         metric_mae=ml_training_run.metric_mae,
@@ -360,6 +374,7 @@ async def run_ml_training_pipeline(
         )
         metrics = training_result['metrics']
         model_params_json = training_result['model_params']
+        feature_importance_json = training_result['feature_importance_json']
         model_path = save_catboost_model(
             model=training_result['model'],
             training_run_name=training_run_name,
@@ -380,6 +395,7 @@ async def run_ml_training_pipeline(
         status=ML_TRAINING_STATUS_SUCCESS,
         is_success=True,
         model_params_json=model_params_json,
+        feature_importance_json=feature_importance_json,
         train_row_count=split.train_row_count,
         test_row_count=split.test_row_count,
         metric_mae=metrics['metric_mae'],
@@ -399,6 +415,7 @@ async def run_ml_training_pipeline(
         model_type=ML_MODEL_TYPE_CATBOOST_REGRESSOR,
         target_name=ML_TARGET_CALLBACKS,
         model_params_json=model_params_json,
+        feature_importance_json=feature_importance_json,
         status=ML_TRAINING_STATUS_SUCCESS,
         is_success=True,
         train_row_count=split.train_row_count,
@@ -420,6 +437,7 @@ async def run_ml_training_pipeline(
         model_type=ml_training_run.model_type,
         target_name=ml_training_run.target_name,
         model_params_json=ml_training_run.model_params_json,
+        feature_importance_json=ml_training_run.feature_importance_json,
         train_row_count=ml_training_run.train_row_count,
         test_row_count=ml_training_run.test_row_count,
         metric_mae=ml_training_run.metric_mae,

@@ -26,6 +26,27 @@ def format_model_params(
     return '\n'.join(rows)
 
 
+def format_feature_importance(
+    feature_importance_json: dict[str, Any] | None,
+) -> str:
+    """Format feature importance for markdown table.
+    Args:
+        feature_importance_json (dict[str, Any] | None): Feature importance.
+    """
+    if not feature_importance_json:
+        return '| Feature | Importance |\n|---|---:|\n| None | None |'
+
+    rows = [
+        '| Feature | Importance |',
+        '|---|---:|',
+    ]
+
+    for feature_name, importance_value in feature_importance_json.items():
+        rows.append(f'| {feature_name} | {importance_value} |')
+
+    return '\n'.join(rows)
+
+
 def build_ml_training_report_content(
     training_run_name: str,
     ml_dataset_run_id: int | None,
@@ -35,6 +56,7 @@ def build_ml_training_report_content(
     model_type: str,
     target_name: str,
     model_params_json: dict[str, Any] | None,
+    feature_importance_json: dict[str, Any] | None,
     train_row_count: int,
     test_row_count: int,
     metric_mae: float | None,
@@ -54,6 +76,7 @@ def build_ml_training_report_content(
         model_type (str): Model type.
         target_name (str): Target name.
         model_params_json (dict[str, Any] | None): Model parameters.
+        feature_importance_json (dict[str, Any] | None): Feature importance.
         train_row_count (int): Number of train rows.
         test_row_count (int): Number of test rows.
         metric_mae (float | None): MAE metric.
@@ -65,6 +88,9 @@ def build_ml_training_report_content(
     """
     formatted_model_params = format_model_params(
         model_params_json=model_params_json,
+    )
+    formatted_feature_importance = format_feature_importance(
+        feature_importance_json=feature_importance_json,
     )
 
     return f"""# Pipeline 3 - ML Training Report
@@ -90,6 +116,10 @@ def build_ml_training_report_content(
 ## Model Parameters
 
 {formatted_model_params}
+
+## Feature Importance
+
+{formatted_feature_importance}
 
 ## Dataset Split
 

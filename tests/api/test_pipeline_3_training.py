@@ -15,6 +15,12 @@ CATBOOST_BASELINE_PARAMS = {
     'allow_writing_files': False,
 }
 
+FEATURE_IMPORTANCE_JSON = {
+    'salary_mid': 22.5,
+    'publication_hour': 14.2,
+    'city': 9.8,
+}
+
 
 @pytest.mark.asyncio
 async def test_pipeline_3_training_success(
@@ -44,6 +50,7 @@ async def test_pipeline_3_training_success(
             'model_type': 'catboost_regressor',
             'target_name': 'callbacks',
             'model_params_json': CATBOOST_BASELINE_PARAMS,
+            'feature_importance_json': FEATURE_IMPORTANCE_JSON,
             'train_row_count': 80,
             'test_row_count': 20,
             'metric_mae': 0.3,
@@ -88,6 +95,7 @@ async def test_pipeline_3_training_success(
         'model_type': 'catboost_regressor',
         'target_name': 'callbacks',
         'model_params_json': CATBOOST_BASELINE_PARAMS,
+        'feature_importance_json': FEATURE_IMPORTANCE_JSON,
         'train_row_count': 80,
         'test_row_count': 20,
         'metric_mae': 0.3,
@@ -128,6 +136,7 @@ async def test_pipeline_3_training_with_dataset_run_id(
             'model_type': 'catboost_regressor',
             'target_name': 'callbacks',
             'model_params_json': CATBOOST_BASELINE_PARAMS,
+            'feature_importance_json': FEATURE_IMPORTANCE_JSON,
             'train_row_count': 3349,
             'test_row_count': 998,
             'metric_mae': 0.3208829917467808,
@@ -173,6 +182,7 @@ async def test_pipeline_3_training_with_dataset_run_id(
         'model_type': 'catboost_regressor',
         'target_name': 'callbacks',
         'model_params_json': CATBOOST_BASELINE_PARAMS,
+        'feature_importance_json': FEATURE_IMPORTANCE_JSON,
         'train_row_count': 3349,
         'test_row_count': 998,
         'metric_mae': 0.3208829917467808,
@@ -215,6 +225,7 @@ async def test_pipeline_3_training_no_data(
             'model_type': 'catboost_regressor',
             'target_name': 'callbacks',
             'model_params_json': CATBOOST_BASELINE_PARAMS,
+            'feature_importance_json': None,
             'train_row_count': 0,
             'test_row_count': 0,
             'metric_mae': None,
@@ -257,6 +268,7 @@ async def test_pipeline_3_training_no_data(
         'model_type': 'catboost_regressor',
         'target_name': 'callbacks',
         'model_params_json': CATBOOST_BASELINE_PARAMS,
+        'feature_importance_json': None,
         'train_row_count': 0,
         'test_row_count': 0,
         'metric_mae': None,
