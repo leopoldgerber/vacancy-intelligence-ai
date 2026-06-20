@@ -3,6 +3,7 @@ from pathlib import Path
 from app.services.ml_training.report_builders import (
     build_ml_training_report_content,
 )
+from app.services.ml_training.report_builders import format_feature_importance
 from app.services.ml_training.report_builders import format_model_params
 from app.services.ml_training.report_builders import save_ml_training_report
 
@@ -15,6 +16,12 @@ CATBOOST_BASELINE_PARAMS = {
     'random_seed': 42,
     'verbose': False,
     'allow_writing_files': False,
+}
+
+FEATURE_IMPORTANCE_JSON = {
+    'salary_mid': 22.5,
+    'publication_hour': 14.2,
+    'city': 9.8,
 }
 
 
@@ -46,6 +53,30 @@ def test_format_model_params_empty() -> None:
     assert '| None | None |' in result
 
 
+def test_format_feature_importance() -> None:
+    """Test feature importance formatter.
+    Args:
+        """
+    result = format_feature_importance(
+        feature_importance_json=FEATURE_IMPORTANCE_JSON,
+    )
+
+    assert '| Feature | Importance |' in result
+    assert '| salary_mid | 22.5 |' in result
+    assert '| publication_hour | 14.2 |' in result
+    assert '| city | 9.8 |' in result
+
+
+def test_format_feature_importance_empty() -> None:
+    """Test empty feature importance formatter.
+    Args:
+        """
+    result = format_feature_importance(feature_importance_json=None)
+
+    assert '| Feature | Importance |' in result
+    assert '| None | None |' in result
+
+
 def test_build_ml_training_report_content() -> None:
     """Test ML training report content builder.
     Args:
@@ -59,6 +90,7 @@ def test_build_ml_training_report_content() -> None:
         model_type='catboost_regressor',
         target_name='callbacks',
         model_params_json=CATBOOST_BASELINE_PARAMS,
+        feature_importance_json=FEATURE_IMPORTANCE_JSON,
         train_row_count=80,
         test_row_count=20,
         metric_mae=0.3,
@@ -73,8 +105,13 @@ def test_build_ml_training_report_content() -> None:
     assert 'ml_training_test' in result
     assert 'catboost_regressor' in result
     assert 'callbacks' in result
+    assert '## Model Parameters' in result
     assert '| iterations | 100 |' in result
     assert '| learning_rate | 0.05 |' in result
+    assert '## Feature Importance' in result
+    assert '| salary_mid | 22.5 |' in result
+    assert '| publication_hour | 14.2 |' in result
+    assert '| city | 9.8 |' in result
     assert '80' in result
     assert '20' in result
     assert '10.0' in result

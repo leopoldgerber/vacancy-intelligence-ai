@@ -14,10 +14,13 @@ from app.services.ml_training.data_loaders import resolve_ml_dataset_run
 from app.services.ml_training.dataset_builders import build_dataset
 from app.services.ml_training.model_builders import train_and_evaluate_catboost
 from app.services.ml_training.model_configs import get_catboost_baseline_params
-from app.services.ml_training.name_builders import (
-    build_ml_training_report_name)
+from app.services.ml_training.name_builders import build_ml_training_report_name
 from app.services.ml_training.name_builders import build_ml_training_run_name
 from app.services.ml_training.persistence import save_ml_training_run
+from app.services.ml_training.prediction_builders import build_prediction_rows
+from app.services.ml_training.prediction_persistence import (
+    save_ml_training_predictions,
+)
 from app.services.ml_training.report_builders import (
     build_ml_training_report_content,
 )
@@ -427,6 +430,17 @@ async def run_ml_training_pipeline(
         mean_target=metrics['mean_target'],
         model_path=model_path,
         report_name=report_name,
+    )
+
+    prediction_rows = build_prediction_rows(
+        ml_training_run_id=ml_training_run.id,
+        source_data=training_dataframe,
+        split=split,
+        predictions=training_result['predictions'],
+    )
+    await save_ml_training_predictions(
+        session=session,
+        prediction_rows=prediction_rows,
     )
 
     return build_training_result(
