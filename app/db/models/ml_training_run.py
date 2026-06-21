@@ -52,6 +52,10 @@ class MlTrainingRun(Base):
         JSON,
         nullable=True,
     )
+    prediction_diagnostics_json: Mapped[dict[str, Any] | None] = mapped_column(
+        JSON,
+        nullable=True,
+    )
     status: Mapped[str] = mapped_column(
         String(64),
         nullable=False,

@@ -65,6 +65,7 @@ def build_ml_training_report_content(
     baseline_mae: float | None,
     mean_target: float | None,
     model_path: str | None,
+    prediction_row_count: int = 0,
 ) -> str:
     """Build ML training report content.
     Args:
@@ -85,6 +86,7 @@ def build_ml_training_report_content(
         baseline_mae (float | None): Baseline MAE metric.
         mean_target (float | None): Mean train target.
         model_path (str | None): Model artifact path.
+        prediction_row_count (int): Number of saved prediction rows.
     """
     formatted_model_params = format_model_params(
         model_params_json=model_params_json,
@@ -127,6 +129,7 @@ def build_ml_training_report_content(
 |---|---:|
 | Train Rows | {train_row_count} |
 | Test Rows | {test_row_count} |
+| Prediction Rows | {prediction_row_count} |
 | Mean Train Target | {mean_target} |
 
 ## Metrics

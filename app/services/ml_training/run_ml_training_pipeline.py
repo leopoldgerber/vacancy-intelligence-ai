@@ -102,6 +102,7 @@ def save_training_report_from_values(
     feature_importance_json: dict[str, Any] | None,
     train_row_count: int,
     test_row_count: int,
+    prediction_row_count: int,
     metric_mae: float | None,
     metric_rmse: float | None,
     metric_r2: float | None,
@@ -121,6 +122,7 @@ def save_training_report_from_values(
         feature_importance_json (dict[str, Any] | None): Feature importance.
         train_row_count (int): Number of train rows.
         test_row_count (int): Number of test rows.
+        prediction_row_count (int): Number of saved prediction rows.
         metric_mae (float | None): MAE metric.
         metric_rmse (float | None): RMSE metric.
         metric_r2 (float | None): R2 metric.
@@ -141,6 +143,7 @@ def save_training_report_from_values(
         feature_importance_json=feature_importance_json,
         train_row_count=train_row_count,
         test_row_count=test_row_count,
+        prediction_row_count=prediction_row_count,
         metric_mae=metric_mae,
         metric_rmse=metric_rmse,
         metric_r2=metric_r2,
@@ -184,6 +187,7 @@ async def save_no_data_training_run(
         feature_importance_json=feature_importance_json,
         train_row_count=0,
         test_row_count=0,
+        prediction_row_count=prediction_row_count,
         metric_mae=None,
         metric_rmse=None,
         metric_r2=None,
@@ -267,6 +271,7 @@ async def save_failed_training_run(
         feature_importance_json=feature_importance_json,
         train_row_count=0,
         test_row_count=0,
+        prediction_row_count=prediction_row_count,
         metric_mae=None,
         metric_rmse=None,
         metric_r2=None,
@@ -412,6 +417,7 @@ async def run_ml_training_pipeline(
         feature_importance_json=feature_importance_json,
         train_row_count=split.train_row_count,
         test_row_count=split.test_row_count,
+        prediction_row_count=prediction_row_count,
         metric_mae=metrics['metric_mae'],
         metric_rmse=metrics['metric_rmse'],
         metric_r2=metrics['metric_r2'],
