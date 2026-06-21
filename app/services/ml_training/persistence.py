@@ -14,6 +14,7 @@ async def save_ml_training_run(
     target_name: str,
     model_params_json: dict[str, Any] | None,
     feature_importance_json: dict[str, Any] | None,
+    prediction_diagnostics_json: dict[str, Any] | None,
     status: str,
     is_success: bool,
     train_row_count: int,
@@ -37,6 +38,8 @@ async def save_ml_training_run(
         target_name (str): Target name.
         model_params_json (dict[str, Any] | None): Model parameters.
         feature_importance_json (dict[str, Any] | None): Feature importance.
+        prediction_diagnostics_json (dict[str, Any] | None):
+            Prediction diagnostics.
         status (str): Training run status.
         is_success (bool): Whether training run is successful.
         train_row_count (int): Number of train rows.
@@ -58,6 +61,7 @@ async def save_ml_training_run(
         target_name=target_name,
         model_params_json=model_params_json,
         feature_importance_json=feature_importance_json,
+        prediction_diagnostics_json=prediction_diagnostics_json,
         status=status,
         is_success=is_success,
         train_row_count=train_row_count,

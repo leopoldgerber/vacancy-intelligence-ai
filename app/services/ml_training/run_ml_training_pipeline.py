@@ -19,6 +19,9 @@ from app.services.ml_training.name_builders import (
 from app.services.ml_training.name_builders import build_ml_training_run_name
 from app.services.ml_training.persistence import save_ml_training_run
 from app.services.ml_training.prediction_builders import build_prediction_rows
+from app.services.ml_training.prediction_diagnostic_builders import (
+    build_prediction_diagnostics,
+)
 from app.services.ml_training.prediction_persistence import (
     save_ml_training_predictions,
 )
@@ -38,6 +41,7 @@ def build_training_result(
     target_name: str,
     model_params_json: dict[str, Any] | None,
     feature_importance_json: dict[str, Any] | None,
+    prediction_diagnostics_json: dict[str, Any] | None,
     train_row_count: int,
     test_row_count: int,
     prediction_row_count: int,
@@ -59,6 +63,8 @@ def build_training_result(
         target_name (str): Target name.
         model_params_json (dict[str, Any] | None): Model parameters.
         feature_importance_json (dict[str, Any] | None): Feature importance.
+        prediction_diagnostics_json (dict[str, Any] | None):
+            Prediction diagnostics.
         train_row_count (int): Number of train rows.
         test_row_count (int): Number of test rows.
         prediction_row_count (int): Number of saved prediction rows.
@@ -79,6 +85,7 @@ def build_training_result(
         'target_name': target_name,
         'model_params_json': model_params_json,
         'feature_importance_json': feature_importance_json,
+        'prediction_diagnostics_json': prediction_diagnostics_json,
         'train_row_count': train_row_count,
         'test_row_count': test_row_count,
         'prediction_row_count': prediction_row_count,
@@ -100,6 +107,7 @@ def save_training_report_from_values(
     is_success: bool,
     model_params_json: dict[str, Any] | None,
     feature_importance_json: dict[str, Any] | None,
+    prediction_diagnostics_json: dict[str, Any] | None,
     train_row_count: int,
     test_row_count: int,
     prediction_row_count: int,
@@ -120,6 +128,8 @@ def save_training_report_from_values(
         is_success (bool): Whether training run was successful.
         model_params_json (dict[str, Any] | None): Model parameters.
         feature_importance_json (dict[str, Any] | None): Feature importance.
+        prediction_diagnostics_json (dict[str, Any] | None):
+            Prediction diagnostics.
         train_row_count (int): Number of train rows.
         test_row_count (int): Number of test rows.
         prediction_row_count (int): Number of saved prediction rows.
@@ -141,6 +151,7 @@ def save_training_report_from_values(
         target_name=ML_TARGET_CALLBACKS,
         model_params_json=model_params_json,
         feature_importance_json=feature_importance_json,
+        prediction_diagnostics_json=prediction_diagnostics_json,
         train_row_count=train_row_count,
         test_row_count=test_row_count,
         prediction_row_count=prediction_row_count,
@@ -175,6 +186,7 @@ async def save_no_data_training_run(
     """
     model_params_json = get_catboost_baseline_params()
     feature_importance_json = None
+    prediction_diagnostics_json = None
     prediction_row_count = 0
 
     save_training_report_from_values(
@@ -185,6 +197,7 @@ async def save_no_data_training_run(
         is_success=False,
         model_params_json=model_params_json,
         feature_importance_json=feature_importance_json,
+        prediction_diagnostics_json=prediction_diagnostics_json,
         train_row_count=0,
         test_row_count=0,
         prediction_row_count=prediction_row_count,
@@ -206,6 +219,7 @@ async def save_no_data_training_run(
         target_name=ML_TARGET_CALLBACKS,
         model_params_json=model_params_json,
         feature_importance_json=feature_importance_json,
+        prediction_diagnostics_json=prediction_diagnostics_json,
         status=ML_TRAINING_STATUS_NO_DATA,
         is_success=False,
         train_row_count=0,
@@ -229,6 +243,9 @@ async def save_no_data_training_run(
         target_name=ml_training_run.target_name,
         model_params_json=ml_training_run.model_params_json,
         feature_importance_json=ml_training_run.feature_importance_json,
+        prediction_diagnostics_json=(
+            ml_training_run.prediction_diagnostics_json
+        ),
         train_row_count=ml_training_run.train_row_count,
         test_row_count=ml_training_run.test_row_count,
         prediction_row_count=ml_training_run.prediction_row_count,
@@ -259,6 +276,7 @@ async def save_failed_training_run(
     """
     model_params_json = get_catboost_baseline_params()
     feature_importance_json = None
+    prediction_diagnostics_json = None
     prediction_row_count = 0
 
     save_training_report_from_values(
@@ -269,6 +287,7 @@ async def save_failed_training_run(
         is_success=False,
         model_params_json=model_params_json,
         feature_importance_json=feature_importance_json,
+        prediction_diagnostics_json=prediction_diagnostics_json,
         train_row_count=0,
         test_row_count=0,
         prediction_row_count=prediction_row_count,
@@ -290,6 +309,7 @@ async def save_failed_training_run(
         target_name=ML_TARGET_CALLBACKS,
         model_params_json=model_params_json,
         feature_importance_json=feature_importance_json,
+        prediction_diagnostics_json=prediction_diagnostics_json,
         status=ML_TRAINING_STATUS_FAILED,
         is_success=False,
         train_row_count=0,
@@ -313,6 +333,9 @@ async def save_failed_training_run(
         target_name=ml_training_run.target_name,
         model_params_json=ml_training_run.model_params_json,
         feature_importance_json=ml_training_run.feature_importance_json,
+        prediction_diagnostics_json=(
+            ml_training_run.prediction_diagnostics_json
+        ),
         train_row_count=ml_training_run.train_row_count,
         test_row_count=ml_training_run.test_row_count,
         prediction_row_count=ml_training_run.prediction_row_count,
@@ -394,6 +417,16 @@ async def run_ml_training_pipeline(
         model_params_json = training_result['model_params']
         feature_importance_json = training_result['feature_importance_json']
         prediction_row_count = split.test_row_count
+        temporary_prediction_rows = build_prediction_rows(
+            ml_training_run_id=0,
+            source_data=training_dataframe,
+            split=split,
+            predictions=training_result['predictions'],
+        )
+        prediction_diagnostics_json = build_prediction_diagnostics(
+            prediction_rows=temporary_prediction_rows,
+            source_data=training_dataframe,
+        )
         model_path = save_catboost_model(
             model=training_result['model'],
             training_run_name=training_run_name,
@@ -415,6 +448,7 @@ async def run_ml_training_pipeline(
         is_success=True,
         model_params_json=model_params_json,
         feature_importance_json=feature_importance_json,
+        prediction_diagnostics_json=prediction_diagnostics_json,
         train_row_count=split.train_row_count,
         test_row_count=split.test_row_count,
         prediction_row_count=prediction_row_count,
@@ -436,6 +470,7 @@ async def run_ml_training_pipeline(
         target_name=ML_TARGET_CALLBACKS,
         model_params_json=model_params_json,
         feature_importance_json=feature_importance_json,
+        prediction_diagnostics_json=prediction_diagnostics_json,
         status=ML_TRAINING_STATUS_SUCCESS,
         is_success=True,
         train_row_count=split.train_row_count,
@@ -470,6 +505,9 @@ async def run_ml_training_pipeline(
         target_name=ml_training_run.target_name,
         model_params_json=ml_training_run.model_params_json,
         feature_importance_json=ml_training_run.feature_importance_json,
+        prediction_diagnostics_json=(
+            ml_training_run.prediction_diagnostics_json
+        ),
         train_row_count=ml_training_run.train_row_count,
         test_row_count=ml_training_run.test_row_count,
         prediction_row_count=ml_training_run.prediction_row_count,

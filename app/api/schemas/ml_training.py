@@ -14,6 +14,7 @@ class MlTrainingRunResponse(BaseModel):
     target_name: str
     model_params_json: dict[str, Any] | None
     feature_importance_json: dict[str, Any] | None
+    prediction_diagnostics_json: dict[str, Any] | None
     train_row_count: int
     test_row_count: int
     prediction_row_count: int
