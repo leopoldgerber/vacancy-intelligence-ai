@@ -70,6 +70,11 @@ class MlTrainingRun(Base):
         default=0,
         nullable=False,
     )
+    prediction_row_count: Mapped[int] = mapped_column(
+        Integer,
+        default=0,
+        nullable=False,
+    )
     metric_mae: Mapped[float | None] = mapped_column(
         Float,
         nullable=True,

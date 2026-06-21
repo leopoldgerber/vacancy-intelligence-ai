@@ -18,6 +18,7 @@ async def save_ml_training_run(
     is_success: bool,
     train_row_count: int,
     test_row_count: int,
+    prediction_row_count: int,
     metric_mae: float | None,
     metric_rmse: float | None,
     metric_r2: float | None,
@@ -40,6 +41,7 @@ async def save_ml_training_run(
         is_success (bool): Whether training run is successful.
         train_row_count (int): Number of train rows.
         test_row_count (int): Number of test rows.
+        prediction_row_count (int): Number of saved prediction rows.
         metric_mae (float | None): MAE metric.
         metric_rmse (float | None): RMSE metric.
         metric_r2 (float | None): R2 metric.
@@ -60,6 +62,7 @@ async def save_ml_training_run(
         is_success=is_success,
         train_row_count=train_row_count,
         test_row_count=test_row_count,
+        prediction_row_count=prediction_row_count,
         metric_mae=metric_mae,
         metric_rmse=metric_rmse,
         metric_r2=metric_r2,

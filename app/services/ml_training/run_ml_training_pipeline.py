@@ -14,7 +14,8 @@ from app.services.ml_training.data_loaders import resolve_ml_dataset_run
 from app.services.ml_training.dataset_builders import build_dataset
 from app.services.ml_training.model_builders import train_and_evaluate_catboost
 from app.services.ml_training.model_configs import get_catboost_baseline_params
-from app.services.ml_training.name_builders import build_ml_training_report_name
+from app.services.ml_training.name_builders import (
+    build_ml_training_report_name)
 from app.services.ml_training.name_builders import build_ml_training_run_name
 from app.services.ml_training.persistence import save_ml_training_run
 from app.services.ml_training.prediction_builders import build_prediction_rows
@@ -39,6 +40,7 @@ def build_training_result(
     feature_importance_json: dict[str, Any] | None,
     train_row_count: int,
     test_row_count: int,
+    prediction_row_count: int,
     metric_mae: float | None,
     metric_rmse: float | None,
     metric_r2: float | None,
@@ -59,6 +61,7 @@ def build_training_result(
         feature_importance_json (dict[str, Any] | None): Feature importance.
         train_row_count (int): Number of train rows.
         test_row_count (int): Number of test rows.
+        prediction_row_count (int): Number of saved prediction rows.
         metric_mae (float | None): MAE metric.
         metric_rmse (float | None): RMSE metric.
         metric_r2 (float | None): R2 metric.
@@ -78,6 +81,7 @@ def build_training_result(
         'feature_importance_json': feature_importance_json,
         'train_row_count': train_row_count,
         'test_row_count': test_row_count,
+        'prediction_row_count': prediction_row_count,
         'metric_mae': metric_mae,
         'metric_rmse': metric_rmse,
         'metric_r2': metric_r2,
@@ -168,6 +172,7 @@ async def save_no_data_training_run(
     """
     model_params_json = get_catboost_baseline_params()
     feature_importance_json = None
+    prediction_row_count = 0
 
     save_training_report_from_values(
         training_run_name=training_run_name,
@@ -201,6 +206,7 @@ async def save_no_data_training_run(
         is_success=False,
         train_row_count=0,
         test_row_count=0,
+        prediction_row_count=prediction_row_count,
         metric_mae=None,
         metric_rmse=None,
         metric_r2=None,
@@ -221,6 +227,7 @@ async def save_no_data_training_run(
         feature_importance_json=ml_training_run.feature_importance_json,
         train_row_count=ml_training_run.train_row_count,
         test_row_count=ml_training_run.test_row_count,
+        prediction_row_count=ml_training_run.prediction_row_count,
         metric_mae=ml_training_run.metric_mae,
         metric_rmse=ml_training_run.metric_rmse,
         metric_r2=ml_training_run.metric_r2,
@@ -248,6 +255,7 @@ async def save_failed_training_run(
     """
     model_params_json = get_catboost_baseline_params()
     feature_importance_json = None
+    prediction_row_count = 0
 
     save_training_report_from_values(
         training_run_name=training_run_name,
@@ -281,6 +289,7 @@ async def save_failed_training_run(
         is_success=False,
         train_row_count=0,
         test_row_count=0,
+        prediction_row_count=prediction_row_count,
         metric_mae=None,
         metric_rmse=None,
         metric_r2=None,
@@ -301,6 +310,7 @@ async def save_failed_training_run(
         feature_importance_json=ml_training_run.feature_importance_json,
         train_row_count=ml_training_run.train_row_count,
         test_row_count=ml_training_run.test_row_count,
+        prediction_row_count=ml_training_run.prediction_row_count,
         metric_mae=ml_training_run.metric_mae,
         metric_rmse=ml_training_run.metric_rmse,
         metric_r2=ml_training_run.metric_r2,
@@ -378,6 +388,7 @@ async def run_ml_training_pipeline(
         metrics = training_result['metrics']
         model_params_json = training_result['model_params']
         feature_importance_json = training_result['feature_importance_json']
+        prediction_row_count = split.test_row_count
         model_path = save_catboost_model(
             model=training_result['model'],
             training_run_name=training_run_name,
@@ -423,6 +434,7 @@ async def run_ml_training_pipeline(
         is_success=True,
         train_row_count=split.train_row_count,
         test_row_count=split.test_row_count,
+        prediction_row_count=prediction_row_count,
         metric_mae=metrics['metric_mae'],
         metric_rmse=metrics['metric_rmse'],
         metric_r2=metrics['metric_r2'],
@@ -454,6 +466,7 @@ async def run_ml_training_pipeline(
         feature_importance_json=ml_training_run.feature_importance_json,
         train_row_count=ml_training_run.train_row_count,
         test_row_count=ml_training_run.test_row_count,
+        prediction_row_count=ml_training_run.prediction_row_count,
         metric_mae=ml_training_run.metric_mae,
         metric_rmse=ml_training_run.metric_rmse,
         metric_r2=ml_training_run.metric_r2,

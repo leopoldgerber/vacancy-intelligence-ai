@@ -16,6 +16,7 @@ class MlTrainingRunResponse(BaseModel):
     feature_importance_json: dict[str, Any] | None
     train_row_count: int
     test_row_count: int
+    prediction_row_count: int
     metric_mae: float | None
     metric_rmse: float | None
     metric_r2: float | None

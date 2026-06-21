@@ -24,7 +24,7 @@ FEATURE_IMPORTANCE_JSON = {
 
 @pytest.mark.asyncio
 async def test_pipeline_3_training_success(
-    monkeypatch: pytest.MonkeyPatch
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Test Pipeline 3 training endpoint success response.
     Args:
@@ -53,6 +53,7 @@ async def test_pipeline_3_training_success(
             'feature_importance_json': FEATURE_IMPORTANCE_JSON,
             'train_row_count': 80,
             'test_row_count': 20,
+            'prediction_row_count': 20,
             'metric_mae': 0.3,
             'metric_rmse': 0.6,
             'metric_r2': 0.1,
@@ -98,6 +99,7 @@ async def test_pipeline_3_training_success(
         'feature_importance_json': FEATURE_IMPORTANCE_JSON,
         'train_row_count': 80,
         'test_row_count': 20,
+        'prediction_row_count': 20,
         'metric_mae': 0.3,
         'metric_rmse': 0.6,
         'metric_r2': 0.1,
@@ -139,6 +141,7 @@ async def test_pipeline_3_training_with_dataset_run_id(
             'feature_importance_json': FEATURE_IMPORTANCE_JSON,
             'train_row_count': 3349,
             'test_row_count': 998,
+            'prediction_row_count': 998,
             'metric_mae': 0.3208829917467808,
             'metric_rmse': 0.6562405923499849,
             'metric_r2': 0.0023936394210444245,
@@ -185,6 +188,7 @@ async def test_pipeline_3_training_with_dataset_run_id(
         'feature_importance_json': FEATURE_IMPORTANCE_JSON,
         'train_row_count': 3349,
         'test_row_count': 998,
+        'prediction_row_count': 998,
         'metric_mae': 0.3208829917467808,
         'metric_rmse': 0.6562405923499849,
         'metric_r2': 0.0023936394210444245,
@@ -228,6 +232,7 @@ async def test_pipeline_3_training_no_data(
             'feature_importance_json': None,
             'train_row_count': 0,
             'test_row_count': 0,
+            'prediction_row_count': 0,
             'metric_mae': None,
             'metric_rmse': None,
             'metric_r2': None,
@@ -271,6 +276,7 @@ async def test_pipeline_3_training_no_data(
         'feature_importance_json': None,
         'train_row_count': 0,
         'test_row_count': 0,
+        'prediction_row_count': 0,
         'metric_mae': None,
         'metric_rmse': None,
         'metric_r2': None,
