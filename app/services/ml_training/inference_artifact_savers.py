@@ -1,11 +1,15 @@
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from app.services.ml_training.inference_report_builders import (
     build_inference_report,
 )
-from app.services.ml_training.run_ml_inference_pipeline import (
-    MlInferencePipelineResult,
-)
+
+
+if TYPE_CHECKING:
+    from app.services.ml_training.run_ml_inference_pipeline import (
+        MlInferencePipelineResult,
+    )
 
 
 INFERENCE_REPORTS_DIR = Path('artifacts/reports/pipeline_3/inference')
@@ -56,7 +60,7 @@ def save_report_text(
 
 
 def save_inference_report(
-    result: MlInferencePipelineResult,
+    result: 'MlInferencePipelineResult',
     reports_dir: str | Path = INFERENCE_REPORTS_DIR,
 ) -> str:
     """Save ML inference markdown report.

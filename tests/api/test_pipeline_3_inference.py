@@ -40,6 +40,11 @@ def build_pipeline_result() -> MlInferencePipelineResult:
         prediction_row_count=2,
         predictions=[1.5, 2.5],
         prediction_rows=prediction_rows,
+        report_name='ml_inference_2026-06-21_21-23-44.md',
+        report_path=(
+            'artifacts/reports/pipeline_3/inference/'
+            'ml_inference_2026-06-21_21-23-44.md'
+        ),
     )
 
 
@@ -90,6 +95,8 @@ async def test_run_pipeline_3_inference(
     assert result.prediction_row_count == 2
     assert result.predictions == [1.5, 2.5]
     assert len(result.prediction_rows) == 2
+    assert result.report_name == 'ml_inference_2026-06-21_21-23-44.md'
+    assert result.report_path is not None
 
 
 def test_inference_response_schema() -> None:
@@ -108,6 +115,8 @@ def test_inference_response_schema() -> None:
         'prediction_row_count': pipeline_result.prediction_row_count,
         'predictions': pipeline_result.predictions,
         'prediction_rows': pipeline_result.prediction_rows,
+        'report_name': pipeline_result.report_name,
+        'report_path': pipeline_result.report_path,
     }
 
     result = ml_inference_route.MlInferenceRunResponse(**response_data)
@@ -115,3 +124,5 @@ def test_inference_response_schema() -> None:
     assert result.ml_training_run_id == 1
     assert result.prediction_row_count == 2
     assert result.predictions == [1.5, 2.5]
+    assert result.report_name == 'ml_inference_2026-06-21_21-23-44.md'
+    assert result.report_path is not None

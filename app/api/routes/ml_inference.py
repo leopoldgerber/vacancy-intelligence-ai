@@ -33,4 +33,6 @@ async def run_pipeline_3_inference(
         prediction_row_count=result.prediction_row_count,
         predictions=result.predictions,
         prediction_rows=result.prediction_rows,
+        report_name=result.report_name,
+        report_path=result.report_path,
     )

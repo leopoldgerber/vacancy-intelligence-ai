@@ -4,6 +4,10 @@ from typing import Any
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models.ml_training_run import MlTrainingRun
+from app.services.ml_training.inference_artifact_savers import (
+    build_report_name,
+    save_inference_report,
+)
 from app.services.ml_training.inference_loaders import load_inference_dataframe
 from app.services.ml_training.inference_loaders import resolve_training_run
 from app.services.ml_training.inference_loaders import validate_training_run
@@ -24,6 +28,8 @@ class MlInferencePipelineResult:
     prediction_row_count: int
     predictions: list[float]
     prediction_rows: list[dict[str, Any]]
+    report_name: str | None = None
+    report_path: str | None = None
 
 
 def build_pipeline_result(
@@ -54,6 +60,22 @@ def build_pipeline_result(
         predictions=inference_result.predictions,
         prediction_rows=inference_result.prediction_rows,
     )
+
+
+def save_pipeline_report(
+    result: MlInferencePipelineResult,
+) -> MlInferencePipelineResult:
+    """Save ML inference pipeline report.
+    Args:
+        result (MlInferencePipelineResult): ML inference pipeline result."""
+    report_name = build_report_name(
+        training_run_name=result.training_run_name,
+    )
+    report_path = save_inference_report(result=result)
+    result.report_name = report_name
+    result.report_path = report_path
+
+    return result
 
 
 async def run_inference_pipeline(
@@ -93,8 +115,9 @@ async def run_inference_pipeline(
         model_path=model_path,
         data=inference_dataframe,
     )
-
-    return build_pipeline_result(
+    pipeline_result = build_pipeline_result(
         ml_training_run=validated_training_run,
         inference_result=inference_result,
     )
+
+    return save_pipeline_report(result=pipeline_result)

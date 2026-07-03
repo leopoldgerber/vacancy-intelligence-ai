@@ -14,6 +14,7 @@ from app.services.ml_training.run_ml_inference_pipeline import (
     MlInferencePipelineResult,
     build_pipeline_result,
     run_inference_pipeline,
+    save_pipeline_report,
 )
 
 
@@ -85,6 +86,32 @@ def build_inference_result() -> MlInferenceResult:
     )
 
 
+def build_result() -> MlInferencePipelineResult:
+    """Build ML inference pipeline result for tests.
+    Args:
+        """
+    return MlInferencePipelineResult(
+        ml_training_run_id=1,
+        training_run_name='ml_training_2026-06-21_21-23-44',
+        ml_dataset_run_id=10,
+        client_id=1,
+        model_path='artifacts/models/pipeline_3/model.cbm',
+        row_count=2,
+        prediction_row_count=2,
+        predictions=[1.5, 2.5],
+        prediction_rows=[
+            {
+                'source_row_index': 0,
+                'predicted_value': 1.5,
+            },
+            {
+                'source_row_index': 1,
+                'predicted_value': 2.5,
+            },
+        ],
+    )
+
+
 def test_build_pipeline_result() -> None:
     """Test ML inference pipeline result building.
     Args:
@@ -136,6 +163,36 @@ def test_build_result_missing_model() -> None:
             ml_training_run=ml_training_run,
             inference_result=inference_result,
         )
+
+
+def test_save_pipeline_report(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Test ML inference pipeline report saving.
+    Args:
+        monkeypatch (pytest.MonkeyPatch): Pytest monkeypatch fixture."""
+    pipeline_result = build_result()
+
+    def fake_save_report(result: MlInferencePipelineResult) -> str:
+        """Save fake inference report.
+        Args:
+            result (MlInferencePipelineResult):
+                ML inference pipeline result."""
+        return 'artifacts/reports/pipeline_3/inference/report.md'
+
+    monkeypatch.setattr(
+        inference_pipeline,
+        'save_inference_report',
+        fake_save_report,
+    )
+
+    result = save_pipeline_report(result=pipeline_result)
+
+    assert result.report_name == 'ml_inference_2026-06-21_21-23-44.md'
+    assert (
+        result.report_path
+        == 'artifacts/reports/pipeline_3/inference/report.md'
+    )
 
 
 @pytest.mark.asyncio
@@ -197,6 +254,21 @@ async def test_run_inference_pipeline(
 
         return inference_result
 
+    def fake_save_pipeline_report(
+        result: MlInferencePipelineResult,
+    ) -> MlInferencePipelineResult:
+        """Save fake pipeline report.
+        Args:
+            result (MlInferencePipelineResult):
+                ML inference pipeline result."""
+        result.report_name = 'ml_inference_2026-06-21_21-23-44.md'
+        result.report_path = (
+            'artifacts/reports/pipeline_3/inference/'
+            'ml_inference_2026-06-21_21-23-44.md'
+        )
+
+        return result
+
     monkeypatch.setattr(
         inference_pipeline,
         'resolve_training_run',
@@ -212,6 +284,11 @@ async def test_run_inference_pipeline(
         'run_ml_inference',
         fake_run_inference,
     )
+    monkeypatch.setattr(
+        inference_pipeline,
+        'save_pipeline_report',
+        fake_save_pipeline_report,
+    )
 
     result = await run_inference_pipeline(
         session=session,
@@ -226,6 +303,8 @@ async def test_run_inference_pipeline(
     assert result.row_count == 2
     assert result.prediction_row_count == 2
     assert result.predictions == [1.5, 2.5]
+    assert result.report_name == 'ml_inference_2026-06-21_21-23-44.md'
+    assert result.report_path is not None
 
 
 @pytest.mark.asyncio

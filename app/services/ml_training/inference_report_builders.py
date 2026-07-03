@@ -1,9 +1,12 @@
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 from typing import Any
 
-from app.services.ml_training.run_ml_inference_pipeline import (
-    MlInferencePipelineResult,
-)
+
+if TYPE_CHECKING:
+    from app.services.ml_training.run_ml_inference_pipeline import (
+        MlInferencePipelineResult,
+    )
 
 
 @dataclass
@@ -58,7 +61,7 @@ def summarize_predictions(
 
 
 def build_metadata_table(
-    result: MlInferencePipelineResult,
+    result: 'MlInferencePipelineResult',
 ) -> str:
     """Build inference metadata table.
     Args:
@@ -71,6 +74,8 @@ def build_metadata_table(
         ('Model Path', result.model_path),
         ('Source Rows', result.row_count),
         ('Prediction Rows', result.prediction_row_count),
+        ('Report Name', result.report_name),
+        ('Report Path', result.report_path),
     ]
 
     table_rows = [
@@ -154,7 +159,7 @@ def build_prediction_table(
 
 
 def build_inference_report(
-    result: MlInferencePipelineResult,
+    result: 'MlInferencePipelineResult',
 ) -> str:
     """Build ML inference markdown report.
     Args:

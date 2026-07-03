@@ -18,3 +18,5 @@ class MlInferenceRunResponse(BaseModel):
     prediction_row_count: int
     predictions: list[float]
     prediction_rows: list[dict[str, Any]]
+    report_name: str | None = None
+    report_path: str | None = None
