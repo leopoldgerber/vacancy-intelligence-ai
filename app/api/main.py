@@ -6,6 +6,7 @@ from app.api.routes.clients import router as clients_router
 from app.api.routes.features import router as features_router
 from app.api.routes.health import router as health_router
 from app.api.routes.ml_dataset import router as ml_dataset_router
+from app.api.routes.ml_inference import router as ml_inference_router
 from app.api.routes.ml_training import router as ml_training_router
 from app.api.routes.pipeline_1 import router as pipeline_router
 from app.api.routes.pipeline_2 import router as pipeline_2_router
@@ -25,3 +26,4 @@ app.include_router(features_router)
 app.include_router(ml_dataset_router)
 app.include_router(pipeline_2_router)
 app.include_router(ml_training_router)
+app.include_router(ml_inference_router)

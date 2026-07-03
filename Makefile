@@ -102,6 +102,20 @@ pipeline-3-training:
 		-F "client_id=1" \
 		-F "ml_dataset_run_id="
 
+# Pipeline 3 - ML Inference
+ML_TRAINING_RUN_ID ?=
+
+pipeline-3-inference:
+	@if [ -z "$(ML_TRAINING_RUN_ID)" ]; then \
+		curl -X POST http://127.0.0.1:8000/pipeline-3/inference/run \
+			-H "Content-Type: application/json" \
+			-d '{"client_id":$(CLIENT_ID)}'; \
+	else \
+		curl -X POST http://127.0.0.1:8000/pipeline-3/inference/run \
+			-H "Content-Type: application/json" \
+			-d '{"client_id":$(CLIENT_ID),"ml_training_run_id":$(ML_TRAINING_RUN_ID)}'; \
+	fi
+
 # Full local data setup
 local-data-setup:
 	$(MAKE) client-create
